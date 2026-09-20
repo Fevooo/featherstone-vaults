@@ -6,10 +6,10 @@ order: 6
 plateTone: '2'
 scope: Recovered cargo, navigational instruments and naval material with recovery documentation.
 keywords: [Recovered cargo, Navigation, Naval]
-remoteImage: https://commons.wikimedia.org/wiki/Special:FilePath/Silver-plated%20Mariner%27s%20Astrolabe.jpg?width=1600
-imageAlt: Silver-plated mariner's astrolabe dated 1645, recovered from a seventeenth-century wreck site off Santiago.
-imageCredit: Neochichiri11 / Wikimedia Commons · CC0
-imageSourceUrl: https://commons.wikimedia.org/wiki/File:Silver-plated_Mariner%27s_Astrolabe.jpg
+remoteImage: https://commons.wikimedia.org/wiki/Special:FilePath/Diep%20bord%20uit%20V.O.C.-schip%20de%20%27Witte%20Leeuw%27%2C%20NG-1978-127-6403-W.jpg
+imageAlt: Fragmented blue-and-white porcelain plate recovered from the Dutch East Indiaman Witte Leeuw, wrecked in 1613.
+imageCredit: Rijksmuseum / Wikimedia Commons · CC0
+imageSourceUrl: https://commons.wikimedia.org/wiki/File:Diep_bord_uit_V.O.C.-schip_de_%27Witte_Leeuw%27,_NG-1978-127-6403-W.jpg
 intro: >-
   Recovered material is handled only where the recovery is documented and any
   applicable permissions, licences or salvage agreements can be evidenced.
