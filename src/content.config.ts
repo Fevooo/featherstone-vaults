@@ -27,12 +27,15 @@ const collectionsCollection = defineCollection({
       plateTone: z.enum(['1', '2', '3', '4']).default('1'),
 
       /**
-       * The department photograph. Drop a file beside this markdown file and
-       * reference it here; it replaces the blank mount in the homepage strip,
-       * on /collections, and as the banner on the department page.
+       * Department photography can be either a local Astro asset or a stable
+       * open-access museum/public-domain URL. Remote imagery is only used as
+       * representative department photography, never as a sale-object image.
        */
       image: image().optional(),
+      remoteImage: z.string().url().optional(),
       imageAlt: z.string().optional(),
+      imageCredit: z.string().optional(),
+      imageSourceUrl: z.string().url().optional(),
 
       seoTitle: z.string().optional(),
       seoDescription: z.string(),
