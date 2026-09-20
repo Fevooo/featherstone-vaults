@@ -12,10 +12,10 @@ keywords:
   - fossil preparation
   - fossil provenance
   - fossil collecting
-remoteImage: https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/thumbnails/image/ammonite_A.Scott_090319.jpg
-imageAlt: Polished ammonite fossil showing the internal chamber structure.
-imageCredit: Annie Scott, U.S. Geological Survey · Public Domain
-imageSourceUrl: https://www.usgs.gov/media/images/fossil-ammonite
+remoteImage: https://commons.wikimedia.org/wiki/Special:FilePath/Ammonite%20black.jpg?width=1600
+imageAlt: Petrified and crystallised ammonite photographed against a dark ground.
+imageCredit: Jurii / Wikimedia Commons · CC BY 3.0
+imageSourceUrl: https://commons.wikimedia.org/wiki/File:Ammonite_black.jpg
 seoTitle: What Makes a Fossil Museum Quality?
 seoDescription: What collectors should mean by museum-quality fossil, including preparation, completeness, restoration, composite material, locality data and scientific value.
 sources:
