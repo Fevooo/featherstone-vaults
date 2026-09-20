@@ -1,0 +1,91 @@
+---
+import Page from '../layouts/Page.astro';
+import ObjectTile from '../components/ObjectTile.astro';
+import { getArchivedObjects, getDepartments, formatMonthYear } from '../lib/catalogue';
+
+const archived = await getArchivedObjects();
+const departments = await getDepartments();
+const departmentTitle = (id: string) => departments.find((d) => d.id === id)?.data.title ?? id;
+---
+
+<Page
+  title="Archive"
+  heading="Featherstone Vaults Archive."
+  eyebrow="Archive"
+  description="A permanent record of objects that have passed through Featherstone Vaults. Sold entries are retained so each object's history stays traceable."
+  path="/archive"
+  standfirst="Objects that have been sold are not deleted. Their entries stay here permanently, so that a future owner, a researcher or an insurer can find what was recorded about an object at the time it changed hands."
+  trail={[{ label: 'Archive', href: '/archive' }]}
+>
+  <div class="shell">
+    <div class="grid gap-x-16 gap-y-10 rule-t pt-10 lg:grid-cols-12">
+      <h2 class="label-sm text-bronze-lit lg:col-span-3">Why it is kept</h2>
+      <div class="lg:col-span-8 lg:col-start-4">
+        <p class="prose-fv max-w-[40rem]">
+          An object's documentation is worth more when it is continuous. A dealer who removes sold
+          stock removes a link in that chain. Keeping the entries costs us nothing and preserves
+          something that is genuinely difficult to reconstruct later: what was known, claimed and
+          disclosed at the point of sale.
+        </p>
+        <p class="prose-fv mt-5 max-w-[40rem]">
+          Archive entries retain their catalogue number. Prices achieved are not published.
+        </p>
+      </div>
+    </div>
+
+    <section class="pt-20 md:pt-28" aria-labelledby="archive-list">
+      <h2 id="archive-list" class="label-sm rule-t py-5 text-bronze-lit">
+        Sold
+        <span class="ml-3 tnum text-ash">{String(archived.length).padStart(2, '0')}</span>
+      </h2>
+
+      {
+        archived.length > 0 ? (
+          <div class="mt-12 grid grid-cols-2 gap-x-5 gap-y-16 md:grid-cols-3 md:gap-x-7 lg:grid-cols-4 lg:gap-x-8">
+            {archived.map((object, i) => (
+              <div>
+                <ObjectTile
+                  object={object}
+                  loading={i < 4 ? 'eager' : 'lazy'}
+                  sizes="(min-width: 1024px) 23vw, (min-width: 768px) 30vw, 45vw"
+                />
+                <p class="label-sm mt-3 text-ash">
+                  {departmentTitle(object.data.collection)}
+                  {object.data.soldDate && (
+                    <>
+                      <span class="mx-2 opacity-50" aria-hidden="true">
+                        ·
+                      </span>
+                      <time datetime={object.data.soldDate.toISOString().slice(0, 7)}>
+                        {formatMonthYear(object.data.soldDate)}
+                      </time>
+                    </>
+                  )}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="prose-fv mt-10">The archive is empty. It will fill as objects are placed.</p>
+        )
+      }
+    </section>
+
+    <div class="pt-24 pb-24 md:pt-32 md:pb-32">
+      <div class="rule-t pt-12">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <h2 class="display-2 max-w-[20ch] text-ivory lg:col-span-6">
+            Looking for something that has already sold?
+          </h2>
+          <div class="lg:col-span-6">
+            <p class="prose-fv">
+              Comparable material appears more often than collectors expect. Tell us what you were
+              looking for and we will watch for it.
+            </p>
+            <a href="/private-acquisitions" class="action mt-9">Discuss an acquisition</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Page>

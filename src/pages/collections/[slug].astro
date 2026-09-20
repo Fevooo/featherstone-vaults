@@ -1,0 +1,137 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Page from '../../layouts/Page.astro';
+import ObjectTile from '../../components/ObjectTile.astro';
+import {
+  getDepartments,
+  getObjectsInDepartment,
+  type DepartmentEntry,
+  type ObjectEntry,
+} from '../../lib/catalogue';
+
+export const getStaticPaths = (async () => {
+  const departments = await getDepartments();
+  return Promise.all(
+    departments.map(async (department) => {
+      const objects = await getObjectsInDepartment(department.id);
+      return {
+        params: { slug: department.id },
+        props: {
+          department,
+          current: objects.filter((o) => o.data.availability !== 'SOLD'),
+          archived: objects.filter((o) => o.data.availability === 'SOLD'),
+          siblings: departments.filter((d) => d.id !== department.id),
+        },
+      };
+    }),
+  );
+}) satisfies GetStaticPaths;
+
+interface Props {
+  department: DepartmentEntry;
+  current: ObjectEntry[];
+  archived: ObjectEntry[];
+  siblings: DepartmentEntry[];
+}
+
+const { department, current, archived, siblings } = Astro.props;
+const { title, intro, scope, seoTitle, seoDescription, keywords } = department.data;
+const path = `/collections/${department.id}`;
+---
+
+<Page
+  title={seoTitle ?? title}
+  heading={title}
+  eyebrow="Collection"
+  description={seoDescription}
+  path={path}
+  standfirst={scope}
+  trail={[
+    { label: 'Collections', href: '/collections' },
+    { label: title, href: path },
+  ]}
+>
+  <div class="shell">
+    <div class="grid gap-x-16 gap-y-10 rule-t pt-10 lg:grid-cols-12">
+      <h2 class="label-sm text-bronze-lit lg:col-span-3">How we catalogue it</h2>
+      <div class="lg:col-span-8 lg:col-start-4">
+        <p class="prose-fv max-w-[40rem]">{intro}</p>
+        <p class="label-sm mt-8 text-ash">{keywords.join(' · ')}</p>
+      </div>
+    </div>
+
+    <section class="pt-20 md:pt-28" aria-labelledby="current-heading">
+      <h2 id="current-heading" class="label-sm rule-t py-5 text-bronze-lit">
+        Currently catalogued
+        <span class="ml-3 tnum text-ash">{String(current.length).padStart(2, '0')}</span>
+      </h2>
+      {
+        current.length > 0 && (
+          <p class="meta mt-6 max-w-[46rem] text-ash">
+            Catalogue plates are shown blank. Featherstone Vaults photography is in production and
+            will replace them entry by entry; no stand-in imagery is used.
+          </p>
+        )
+      }
+
+      {
+        current.length > 0 ? (
+          <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-16 md:grid-cols-3 md:gap-x-7 lg:gap-x-8">
+            {current.map((object, i) => (
+              <ObjectTile
+                object={object}
+                loading={i < 3 ? 'eager' : 'lazy'}
+                sizes="(min-width: 768px) 30vw, 45vw"
+              />
+            ))}
+          </div>
+        ) : (
+          <div class="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <p class="prose-fv lg:col-span-7">
+              Nothing in this department is publicly catalogued at present. Material moves through
+              it regularly and a good deal of it is placed privately before it reaches the
+              catalogue.
+            </p>
+            <div class="lg:col-span-5">
+              <a href="/private-access" class="action">Request private access</a>
+            </div>
+          </div>
+        )
+      }
+    </section>
+
+    {
+      archived.length > 0 && (
+        <section class="pt-24 md:pt-32" aria-labelledby="archive-heading">
+          <h2 id="archive-heading" class="label-sm rule-t py-5 text-bronze-lit">
+            From the archive
+            <span class="ml-3 tnum text-ash">{String(archived.length).padStart(2, '0')}</span>
+          </h2>
+          <div class="mt-12 grid grid-cols-2 gap-x-5 gap-y-16 md:grid-cols-3 md:gap-x-7 lg:gap-x-8">
+            {archived.map((object) => (
+              <ObjectTile object={object} sizes="(min-width: 768px) 30vw, 45vw" />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <nav aria-label="Other collections" class="pt-24 pb-24 md:pt-32 md:pb-32">
+      <h2 class="label-sm rule-t py-5 text-bronze-lit">Other collections</h2>
+      <ul class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
+        {
+          siblings.map((d) => (
+            <li>
+              <a
+                href={`/collections/${d.id}`}
+                class="meta text-parchment transition-colors hover:text-ivory"
+              >
+                {d.data.title}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</Page>

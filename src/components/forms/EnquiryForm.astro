@@ -1,0 +1,157 @@
+---
+import { SITE } from '../../consts';
+
+export interface FieldDef {
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel' | 'textarea' | 'select';
+  required?: boolean;
+  options?: readonly string[];
+  placeholder?: string;
+  autocomplete?: string;
+  rows?: number;
+  /** Lay the field out across both columns of the two-column grid. */
+  full?: boolean;
+}
+
+interface Props {
+  /** Identifies which form a submission came from. */
+  formName: string;
+  fields: FieldDef[];
+  submitLabel: string;
+  /** Checkbox group rendered before the submit button. */
+  checkboxes?: { legend: string; name: string; options: readonly string[] };
+  /** Small print under the button. */
+  note?: string;
+  id?: string;
+}
+
+const { formName, fields, submitLabel, checkboxes, note, id = 'enquiry-form' } = Astro.props;
+---
+
+<form
+  id={id}
+  class="mt-10"
+  method="post"
+  action={SITE.formEndpoint}
+  data-enquiry-form
+  novalidate
+>
+  <input type="hidden" name="form" value={formName} />
+  <p class="hidden" aria-hidden="true">
+    <label>
+      Leave this field empty
+      <input type="text" name="_confirm" tabindex="-1" autocomplete="off" />
+    </label>
+  </p>
+
+  <div class="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+    {
+      fields.map((f) => (
+        <div class:list={[f.full || f.type === 'textarea' ? 'sm:col-span-2' : '']}>
+          <label class="field-label" for={`${id}-${f.name}`}>
+            {f.label}
+            {!f.required && <span class="ml-2 normal-case tracking-normal opacity-70">optional</span>}
+          </label>
+          {f.type === 'textarea' ? (
+            <textarea
+              id={`${id}-${f.name}`}
+              name={f.name}
+              rows={f.rows ?? 5}
+              class="field-input"
+              required={f.required}
+              placeholder={f.placeholder}
+            />
+          ) : f.type === 'select' ? (
+            <select id={`${id}-${f.name}`} name={f.name} class="field-input" required={f.required}>
+              <option value="">Please select</option>
+              {f.options?.map((o) => <option value={o}>{o}</option>)}
+            </select>
+          ) : (
+            <input
+              id={`${id}-${f.name}`}
+              name={f.name}
+              type={f.type ?? 'text'}
+              class="field-input"
+              required={f.required}
+              placeholder={f.placeholder}
+              autocomplete={f.autocomplete}
+            />
+          )}
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    checkboxes && (
+      <fieldset class="mt-12">
+        <legend class="field-label">{checkboxes.legend}</legend>
+        <div class="mt-2 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+          {checkboxes.options.map((o) => (
+            <label class="checkbox-row">
+              <input type="checkbox" name={checkboxes.name} value={o} />
+              <span>{o}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    )
+  }
+
+  <div class="mt-12 flex flex-col items-start gap-6">
+    <button type="submit" class="action action-solid">{submitLabel}</button>
+    <p class="meta max-w-[34rem] text-ash" data-form-status role="status" aria-live="polite">
+      {note ?? 'Enquiries are answered personally, usually within one working day.'}
+    </p>
+  </div>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-enquiry-form]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const original = status?.textContent ?? '';
+
+    form.addEventListener('submit', async (event) => {
+      if (!form.reportValidity()) {
+        event.preventDefault();
+        return;
+      }
+      event.preventDefault();
+      if (!status || !button) return;
+
+      button.disabled = true;
+      button.style.opacity = '0.6';
+      status.textContent = 'Sending…';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form),
+        });
+        const payload = await response.json().catch(() => ({}) as Record<string, string>);
+
+        if (response.ok) {
+          form.reset();
+          status.textContent =
+            payload.message ?? 'Thank you. Your enquiry has been received and will be answered personally.';
+        } else {
+          status.textContent =
+            payload.message ??
+            'This enquiry could not be sent. Please write to enquiries@featherstonevaults.com and we will reply directly.';
+        }
+      } catch {
+        status.textContent =
+          'This enquiry could not be sent. Please write to enquiries@featherstonevaults.com and we will reply directly.';
+      } finally {
+        button.disabled = false;
+        button.style.opacity = '';
+        window.setTimeout(() => {
+          if (status.textContent !== original) return;
+        }, 0);
+      }
+    });
+  });
+</script>

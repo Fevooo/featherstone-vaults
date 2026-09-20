@@ -1,0 +1,359 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Plate from '../../components/Plate.astro';
+import ObjectTile from '../../components/ObjectTile.astro';
+import { SITE, SPECIMEN_NOTICE } from '../../consts';
+import {
+  getAllObjects,
+  getDepartments,
+  formatPrice,
+  formatDate,
+  AVAILABILITY_LABEL,
+  type ObjectEntry,
+  type DepartmentEntry,
+} from '../../lib/catalogue';
+
+export const getStaticPaths = (async () => {
+  const objects = await getAllObjects();
+  const departments = await getDepartments();
+  return objects.map((object) => ({
+    params: { slug: object.id },
+    props: {
+      object,
+      department: departments.find((d) => d.id === object.data.collection),
+      related: [
+        ...objects.filter(
+          (o) => o.data.collection === object.data.collection && o.id !== object.id,
+        ),
+        ...objects.filter(
+          (o) => o.data.collection !== object.data.collection && o.id !== object.id,
+        ),
+      ].slice(0, 4),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  object: ObjectEntry;
+  department?: DepartmentEntry;
+  related: ObjectEntry[];
+}
+
+const { object, department, related } = Astro.props;
+const d = object.data;
+const path = `/objects/${object.id}`;
+const isSold = d.availability === 'SOLD';
+
+/* Catalogue metadata — only fields that have been established are shown. */
+const fields: Array<[string, string | undefined]> = [
+  ['Collection', department?.data.title],
+  ['Period', d.period],
+  ['Date', d.date],
+  ['Origin', d.origin],
+  ['Culture', d.culture],
+  ['Material', d.material],
+  ['Dimensions', d.dimensions],
+  ['Weight', d.weight],
+  ['Availability', AVAILABILITY_LABEL[d.availability]],
+];
+const shownFields = fields.filter(([, value]) => Boolean(value)) as Array<[string, string]>;
+
+/**
+ * Narrative sections. A section with no researched content renders the note
+ * describing what will be supplied, rather than approximated text.
+ */
+const sections = [
+  {
+    id: 'overview',
+    heading: 'Overview',
+    body: d.description,
+    pending: 'What the object is, how it presents and why it was taken on.',
+  },
+  {
+    id: 'provenance',
+    heading: 'Provenance',
+    list: d.provenance,
+    pending:
+      'The recorded ownership history, given as a dated sequence, with the gaps stated as gaps.',
+  },
+  {
+    id: 'historical-context',
+    heading: 'Historical Context',
+    body: d.historicalContext,
+    pending: 'The period, place and circumstances the object comes from, with sources cited.',
+  },
+  {
+    id: 'condition',
+    heading: 'Condition',
+    body: d.condition,
+    pending:
+      'A plain condition report: losses, repairs, restoration, later additions and surface treatment.',
+  },
+  {
+    id: 'literature',
+    heading: 'Literature',
+    list: d.literature,
+    pending: 'Published references for the object or for directly comparable material.',
+  },
+  {
+    id: 'comparative-examples',
+    heading: 'Comparative Examples',
+    list: d.comparativeExamples,
+    pending: 'Comparable examples in public collections or in recorded sales.',
+  },
+];
+
+/* These two sections describe house practice and are the same for every object. */
+const standingSections = [
+  {
+    id: 'documentation',
+    heading: 'Documentation',
+    body: `Every object is supplied with a Featherstone Vaults dossier: the catalogue entry, the condition report, measurements, photography, and copies of the supporting documents held on file. Original documents accompany the object where we hold them. A dossier can be sent ahead of any commitment to purchase.`,
+  },
+  {
+    id: 'shipping-export',
+    heading: 'Shipping & Export',
+    body: `Objects are packed by specialist handlers and shipped fully insured. Export from the United Kingdom may require a licence depending on the object's age, value and category; where that applies it is identified before sale and the application is made by us. Import requirements in the destination country are the buyer's responsibility, and we will supply whatever documentation is needed to satisfy them.`,
+  },
+];
+
+/* Product data is published only for objects genuinely offered for sale. */
+const productJsonLd = d.specimen
+  ? null
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: d.title,
+      sku: d.catalogueNumber,
+      description: d.seoDescription ?? d.description ?? `${d.title}. ${d.period ?? ''}`.trim(),
+      category: department?.data.title,
+      material: d.material,
+      url: new URL(path, SITE.url).href,
+      brand: { '@id': `${SITE.url}/#organization` },
+      offers: {
+        '@type': 'Offer',
+        url: new URL(path, SITE.url).href,
+        priceCurrency: d.currency,
+        ...(d.price !== undefined && !d.priceOnApplication ? { price: d.price } : {}),
+        availability:
+          d.availability === 'AVAILABLE'
+            ? 'https://schema.org/InStock'
+            : d.availability === 'RESERVED'
+              ? 'https://schema.org/PreOrder'
+              : 'https://schema.org/SoldOut',
+        seller: { '@id': `${SITE.url}/#organization` },
+        businessFunction: 'http://purl.org/goodrelations/v1#Sell',
+      },
+    };
+
+const enquirySubject = `${d.catalogueNumber}, ${d.title}`;
+---
+
+<Base
+  title={d.seoTitle ?? `${d.title}${d.period ? `, ${d.period}` : ''}`}
+  description={
+    d.seoDescription ??
+    `${d.title}. ${[d.period, d.date, d.origin].filter(Boolean).join(', ')}. ${formatPrice(d)}.`
+  }
+  path={path}
+  ogType="product"
+  noindex={d.specimen}
+>
+  <div class="shell">
+    <Breadcrumbs
+      class="pt-8 md:pt-10"
+      trail={[
+        { label: 'Objects', href: '/objects' },
+        ...(department
+          ? [{ label: department.data.title, href: `/collections/${department.id}` }]
+          : []),
+        { label: d.title, href: path },
+      ]}
+    />
+  </div>
+
+  {
+    d.specimen && (
+      <div class="shell mt-8">
+        <p class="label-sm border border-[var(--line-bronze)] px-5 py-4 text-bronze-lit">
+          Catalogue specimen
+          <span class="mx-2 opacity-50" aria-hidden="true">
+            ·
+          </span>
+          <span class="normal-case tracking-[0.04em] text-parchment">{SPECIMEN_NOTICE}</span>
+        </p>
+      </div>
+    )
+  }
+
+  <article class="shell pt-12 md:pt-16">
+    <div class="grid gap-x-16 gap-y-14 lg:grid-cols-12">
+      <!-- Plates ---------------------------------------------------- -->
+      <div class="lg:col-span-7">
+        <Plate
+          ratio="4 / 5"
+          tone="1"
+          image={d.images[0]?.src}
+          alt={d.images[0]?.alt ?? ''}
+          loading="eager"
+          sizes="(min-width: 1024px) 56vw, 100vw"
+        />
+        {
+          d.images.length === 0 && (
+            <p class="meta mt-4 text-ash">Object photography to follow.</p>
+          )
+        }
+        {
+          d.images.length > 1 && (
+            <div class="mt-4 grid grid-cols-3 gap-4">
+              {d.images.slice(1, 4).map((img) => (
+                <Plate
+                  ratio="1 / 1"
+                  tone="2"
+                  image={img.src}
+                  alt={img.alt}
+                  sizes="(min-width: 1024px) 18vw, 32vw"
+                />
+              ))}
+            </div>
+          )
+        }
+      </div>
+
+      <!-- Identity and metadata -------------------------------------- -->
+      <div class="lg:col-span-5">
+        <p class="label-sm tnum text-ash">{d.catalogueNumber}</p>
+        <h1 class="display-1 mt-5 text-ivory">{d.title}</h1>
+        {d.subtitle && <p class="prose-fv mt-5 max-w-none text-parchment">{d.subtitle}</p>}
+
+        <p class="display-3 price mt-9 text-ivory">{formatPrice(d)}</p>
+        {
+          isSold && d.soldDate && (
+            <p class="label-sm mt-3 text-ash">
+              Featherstone Vaults Archive
+              <span class="mx-2 opacity-50" aria-hidden="true">
+                ·
+              </span>
+              <time datetime={d.soldDate.toISOString().slice(0, 10)}>
+                {formatDate(d.soldDate)}
+              </time>
+            </p>
+          )
+        }
+
+        <dl class="fieldlist mt-10">
+          {
+            shownFields.map(([term, value]) => (
+              <div>
+                <dt>{term}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        {
+          !isSold ? (
+            <div class="mt-10">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <a
+                  href={`/enquire?object=${encodeURIComponent(d.catalogueNumber)}`}
+                  class="action action-solid justify-center text-center"
+                >
+                  Enquire about this object
+                </a>
+                <a
+                  href={`/enquire?object=${encodeURIComponent(d.catalogueNumber)}&request=dossier`}
+                  class="action justify-center text-center"
+                >
+                  Request object dossier
+                </a>
+              </div>
+              <p class="meta mt-2 text-ash">
+                Quote {enquirySubject} when writing to us directly at
+                <a
+                  href={`mailto:${SITE.email}?subject=${encodeURIComponent(enquirySubject)}`}
+                  class="ml-1 border-b border-[var(--line-bronze)] text-parchment transition-colors hover:border-bronze-lit hover:text-ivory"
+                >
+                  {SITE.email}
+                </a>
+                .
+              </p>
+            </div>
+          ) : (
+            <div class="mt-10">
+              <p class="meta max-w-[34rem] text-ash">
+                This object has been sold and its entry is retained in the archive as a permanent
+                record. We are glad to be told when comparable material is sought.
+              </p>
+              <a href="/private-acquisitions" class="action-quiet mt-7">
+                Request something comparable
+              </a>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <!-- Catalogue entry ---------------------------------------------- -->
+    <div class="mt-24 grid gap-x-16 gap-y-12 lg:grid-cols-12 lg:mt-32">
+      <h2 class="label-sm text-bronze-lit lg:col-span-3">Catalogue entry</h2>
+
+      <div class="lg:col-span-8 lg:col-start-4">
+        {
+          sections.map((section) => (
+            <section id={section.id} class="rule-t pt-8 pb-12 first:border-t-0 first:pt-0">
+              <h3 class="label-sm text-ash">{section.heading}</h3>
+              {section.body ? (
+                <p class="prose-fv mt-5 max-w-[40rem]">{section.body}</p>
+              ) : section.list && section.list.length > 0 ? (
+                <ol class="mt-5 max-w-[40rem]">
+                  {section.list.map((item) => (
+                    <li class="prose-fv rule-soft-t max-w-none py-3 first:border-t-0">{item}</li>
+                  ))}
+                </ol>
+              ) : (
+                <p class="meta mt-5 max-w-[38rem] text-ash">
+                  <span class="text-bronze-lit">In preparation.</span> {section.pending}
+                </p>
+              )}
+            </section>
+          ))
+        }
+
+        {
+          standingSections.map((section) => (
+            <section id={section.id} class="rule-t pt-8 pb-12">
+              <h3 class="label-sm text-ash">{section.heading}</h3>
+              <p class="prose-fv mt-5 max-w-[40rem]">{section.body}</p>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </article>
+
+  {
+    related.length > 0 && (
+      <section class="shell pt-16 pb-24 md:pb-32" aria-labelledby="related-title">
+        <div class="rule-t pt-8">
+          <h2 id="related-title" class="label-sm text-bronze-lit">
+            More from the catalogue
+          </h2>
+          <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-12 md:gap-x-7 lg:grid-cols-4 lg:gap-x-8">
+            {related.map((item) => (
+              <ObjectTile
+                object={item}
+                sizes="(min-width: 1024px) 23vw, (min-width: 768px) 30vw, 45vw"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {productJsonLd && <script type="application/ld+json" set:html={JSON.stringify(productJsonLd)} is:inline />}
+</Base>

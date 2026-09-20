@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Page not found"
+  description="This page could not be found."
+  path="/404"
+  noindex={true}
+>
+  <div class="shell flex min-h-[58vh] flex-col justify-center py-24">
+    <p class="label-sm tnum text-ash">404</p>
+    <h1 class="display-1 mt-7 max-w-[18ch] text-ivory">This page is not in the catalogue.</h1>
+    <p class="prose-fv mt-8 max-w-[34rem]">
+      The address may have changed, or the object may have been sold. Sold entries are never
+      deleted, so it is worth looking in the archive.
+    </p>
+    <div class="mt-12 flex flex-wrap items-center gap-x-8 gap-y-5">
+      <a href="/objects" class="action action-solid">All objects</a>
+      <a href="/archive" class="action-quiet">The archive</a>
+      <a href="/enquire" class="action-quiet">Make an enquiry</a>
+    </div>
+  </div>
+</Base>

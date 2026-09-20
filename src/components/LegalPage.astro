@@ -1,0 +1,81 @@
+---
+import Page from '../layouts/Page.astro';
+
+export interface Section {
+  heading: string;
+  body: string[];
+  list?: string[];
+}
+
+interface Props {
+  title: string;
+  heading?: string;
+  eyebrow: string;
+  description: string;
+  path: string;
+  standfirst: string;
+  sections: Section[];
+  /** Short line under the last section, e.g. a review date. */
+  footnote?: string;
+}
+
+const { title, heading, eyebrow, description, path, standfirst, sections, footnote } = Astro.props;
+---
+
+<Page
+  title={title}
+  heading={heading ?? `${title}.`}
+  eyebrow={eyebrow}
+  description={description}
+  path={path}
+  standfirst={standfirst}
+  trail={[{ label: title, href: path }]}
+  headingWidth="16ch"
+>
+  <div class="shell pb-24 md:pb-32">
+    <div class="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+      <nav aria-label="On this page" class="lg:col-span-3">
+        <h2 class="label-sm rule-t pt-6 text-bronze-lit">Contents</h2>
+        <ol class="mt-5 space-y-2.5 lg:sticky lg:top-32">
+          {
+            sections.map((s, i) => (
+              <li class="flex gap-3">
+                <span class="label-sm tnum mt-0.5 text-ash">{String(i + 1).padStart(2, '0')}</span>
+                <a
+                  href={`#${s.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+                  class="meta text-parchment transition-colors hover:text-ivory"
+                >
+                  {s.heading}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <div class="lg:col-span-8 lg:col-start-4">
+        {
+          sections.map((s, i) => (
+            <section id={s.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')} class="rule-t py-10">
+              <p class="label-sm tnum text-ash">{String(i + 1).padStart(2, '0')}</p>
+              <h2 class="display-2 mt-4 max-w-[22ch] text-ivory">{s.heading}</h2>
+              <div class="prose-fv mt-6 max-w-[40rem]">
+                {s.body.map((p) => (
+                  <p>{p}</p>
+                ))}
+                {s.list && (
+                  <ul>
+                    {s.list.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
+          ))
+        }
+        {footnote && <p class="label-sm rule-t pt-8 text-ash">{footnote}</p>}
+      </div>
+    </div>
+  </div>
+</Page>

@@ -1,0 +1,91 @@
+---
+import Page from '../../layouts/Page.astro';
+import CollectionPanel from '../../components/CollectionPanel.astro';
+import { getDepartments, getAllObjects } from '../../lib/catalogue';
+
+const departments = await getDepartments();
+const primary = departments.filter((d) => d.data.tier === 'primary');
+const secondary = departments.filter((d) => d.data.tier === 'secondary');
+const objects = await getAllObjects();
+const countIn = (id: string) =>
+  objects.filter((o) => o.data.collection === id && o.data.availability !== 'SOLD').length;
+---
+
+<Page
+  title="Collections"
+  heading="Ten departments."
+  eyebrow="Collections"
+  description="The ten collecting departments of Featherstone Vaults: natural history, antiquities, sacred and religious, rare books, timepieces, maritime and more."
+  path="/collections"
+  standfirst="Six principal departments and four specialist ones. The division reflects how the objects are researched and catalogued rather than how they are sold."
+  trail={[{ label: 'Collections', href: '/collections' }]}
+>
+  <section class="shell" aria-labelledby="primary-heading">
+    <h2 id="primary-heading" class="label-sm rule-t py-5 text-bronze-lit">Principal departments</h2>
+
+    <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-14 md:grid-cols-3 md:gap-x-7 lg:gap-x-8">
+      {
+        primary.map((department, i) => (
+          <CollectionPanel
+            department={department}
+            index={i + 1}
+            ratio="4 / 5"
+            sizes="(min-width: 768px) 30vw, 45vw"
+          />
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="shell pt-24 md:pt-32" aria-labelledby="secondary-heading">
+    <h2 id="secondary-heading" class="label-sm rule-t py-5 text-bronze-lit">
+      Specialist departments
+    </h2>
+
+    <ul class="mt-4">
+      {
+        secondary.map((department, i) => (
+          <li class="rule-soft-t">
+            <a
+              href={`/collections/${department.id}`}
+              class="group grid gap-x-10 gap-y-3 py-9 md:grid-cols-12"
+            >
+              <div class="flex items-baseline gap-3 md:col-span-4">
+                <span class="label-sm tnum text-ash">{String(i + 7).padStart(2, '0')}</span>
+                <h3 class="display-3 text-parchment transition-colors group-hover:text-ivory">
+                  {department.data.title}
+                </h3>
+              </div>
+              <p class="meta text-ash md:col-span-6">{department.data.scope}</p>
+              <p class="label-sm tnum text-ash md:col-span-2 md:text-right">
+                {countIn(department.id) > 0
+                  ? `${countIn(department.id)} ${countIn(department.id) === 1 ? 'object' : 'objects'}`
+                  : 'By enquiry'}
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="shell pt-24 pb-24 md:pt-32 md:pb-32">
+    <div class="rule-t pt-12">
+      <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-6">
+          <h2 class="display-2 max-w-[18ch] text-ivory">
+            Looking for something outside these departments?
+          </h2>
+        </div>
+        <div class="lg:col-span-6">
+          <p class="prose-fv">
+            The departments describe what we hold most often, not the limit of what we will
+            consider. If an object interests you and it does not sit in any of them, it is worth
+            asking.
+          </p>
+          <a href="/private-acquisitions" class="action-quiet mt-9">Discuss an acquisition</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Page>

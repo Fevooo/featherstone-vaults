@@ -1,0 +1,226 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
+import CollectionPanel from '../components/CollectionPanel.astro';
+import ObjectTile from '../components/ObjectTile.astro';
+import { SITE } from '../consts';
+import { getDepartments, getFeaturedObjects, getJournal } from '../lib/catalogue';
+
+const departments = await getDepartments();
+const primary = departments.filter((d) => d.data.tier === 'primary');
+const secondary = departments.filter((d) => d.data.tier === 'secondary');
+const featured = await getFeaturedObjects(4);
+const journal = (await getJournal()).slice(0, 3);
+
+const principles = [
+  {
+    title: 'Curation',
+    body: 'Few objects, chosen slowly. An object is taken on because it is worth owning, not because it will sell.',
+  },
+  {
+    title: 'Authenticity',
+    body: 'Attribution, condition and restoration are described as they are. What is not known is stated as not known.',
+  },
+  {
+    title: 'History',
+    body: 'Ownership history is researched before an object is offered, and the records are supplied with it.',
+  },
+];
+---
+
+<Base
+  fullTitle="Featherstone Vaults · Exceptional Objects. Remarkable Histories."
+  title="Featherstone Vaults"
+  description="A private dealer and collection house for historically, scientifically and culturally significant objects. The Cotswolds, United Kingdom."
+  path="/"
+>
+  <!-- Hero ---------------------------------------------------------- -->
+  <section class="shell" aria-labelledby="hero-title">
+    <div class="pt-20 pb-16 md:pt-28 lg:pt-36 lg:pb-24">
+      <h1 id="hero-title" class="display-hero max-w-[15ch] text-ivory">
+        Exceptional objects.<br />Remarkable histories.
+      </h1>
+
+      <div class="mt-14 grid gap-x-16 gap-y-10 md:grid-cols-12 lg:mt-20">
+        <div class="md:col-span-8 md:col-start-5 lg:col-span-5 lg:col-start-8">
+          <p class="prose-fv max-w-[30rem]">
+            A curated collection of historically, scientifically and culturally significant
+            objects, selected for provenance, quality and story.
+          </p>
+          <div class="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-8">
+            <a href="/objects" class="action action-solid">Explore the collection</a>
+            <a href="/private-acquisitions" class="action-quiet">Private sourcing</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="label-sm flex flex-col gap-y-3 rule-t py-6 text-ash sm:flex-row sm:items-baseline sm:justify-between"
+    >
+      <p>Provenance · Authenticity · Discretion</p>
+      <p>{SITE.locality} · {SITE.country}</p>
+    </div>
+  </section>
+
+  <!-- Primary collections -------------------------------------------- -->
+  <section class="shell pt-20 md:pt-28" aria-labelledby="collections-title">
+    <SectionHead
+      eyebrow="The Collections"
+      heading="Six departments, catalogued to a single standard."
+      linkHref="/collections"
+      linkLabel="All collections"
+    />
+    <h2 id="collections-title" class="sr-only">Collections</h2>
+
+    <div
+      class="mt-12 grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-3 md:gap-x-7 lg:grid-cols-6 lg:gap-x-6"
+    >
+      {
+        primary.map((department, i) => (
+          <CollectionPanel
+            department={department}
+            index={i + 1}
+            sizes="(min-width: 1024px) 16vw, (min-width: 768px) 30vw, 45vw"
+          />
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Selected objects ----------------------------------------------- -->
+  <section class="shell pt-24 md:pt-32" aria-labelledby="selected-title">
+    <SectionHead
+      eyebrow="Selected Objects"
+      heading="From the current catalogue."
+      linkHref="/objects"
+      linkLabel="All objects"
+    />
+    <h2 id="selected-title" class="sr-only">Selected objects</h2>
+
+    <div class="mt-12 grid grid-cols-2 gap-x-5 gap-y-14 md:gap-x-7 lg:grid-cols-4 lg:gap-x-8">
+      {
+        featured.map((object) => (
+          <ObjectTile
+            object={object}
+            sizes="(min-width: 1024px) 23vw, (min-width: 768px) 30vw, 45vw"
+          />
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Further collections -------------------------------------------- -->
+  <section class="shell pt-24 md:pt-32" aria-labelledby="further-title">
+    <SectionHead eyebrow="Further Collections" heading="Specialist departments." />
+    <h2 id="further-title" class="sr-only">Further collections</h2>
+
+    <ul class="mt-10">
+      {
+        secondary.map((department, i) => (
+          <li class="rule-soft-t">
+            <a
+              href={`/collections/${department.id}`}
+              class="group grid gap-x-10 gap-y-3 py-8 md:grid-cols-12"
+            >
+              <div class="flex items-baseline gap-3 md:col-span-4">
+                <span class="label-sm tnum text-ash">{String(i + 7).padStart(2, '0')}</span>
+                <h3 class="display-3 text-parchment transition-colors group-hover:text-ivory">
+                  {department.data.title}
+                </h3>
+              </div>
+              <p class="meta text-ash md:col-span-7">{department.data.scope}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Private acquisitions ------------------------------------------- -->
+  <section class="on-paper mt-24 md:mt-32" aria-labelledby="private-title">
+    <div class="shell py-20 md:py-28 lg:py-36">
+      <p class="label-sm text-[var(--color-bronze-deep)]">Private Acquisitions</p>
+
+      <div class="mt-10 grid gap-x-16 gap-y-10 lg:grid-cols-12">
+        <h2 id="private-title" class="display-1 max-w-[15ch] lg:col-span-7">
+          Some objects are never publicly offered.
+        </h2>
+        <div class="lg:col-span-5 lg:pt-2">
+          <p class="prose-fv max-w-[30rem]">
+            A significant part of the market moves privately, between collections, estates and
+            institutions. Where a collector is looking for something specific, we will look for it
+            on their behalf and report honestly on what is available.
+          </p>
+          <a href="/private-acquisitions" class="action mt-10">Discuss an acquisition</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The house ------------------------------------------------------ -->
+  <section class="shell pt-24 md:pt-32" aria-labelledby="house-title">
+    <SectionHead
+      eyebrow="The House"
+      heading="Rooted in history. At home in the Cotswolds."
+      intro="Featherstone Vaults works from the Cotswolds with collectors internationally. A local presence. A global perspective."
+      linkHref="/about"
+      linkLabel="About the house"
+    />
+    <h2 id="house-title" class="sr-only">The house</h2>
+
+    <dl class="mt-14 grid gap-x-10 gap-y-10 md:grid-cols-3">
+      {
+        principles.map((p, i) => (
+          <div class="rule-t pt-6">
+            <p class="label-sm tnum text-ash">{String(i + 1).padStart(2, '0')}</p>
+            <dt class="display-3 mt-4 text-ivory">{p.title}</dt>
+            <dd class="meta mt-4 max-w-[34ch] text-ash">{p.body}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <!-- Journal -------------------------------------------------------- -->
+  <section class="shell pt-24 md:pt-32" aria-labelledby="journal-title">
+    <SectionHead eyebrow="The Journal" linkHref="/journal" linkLabel="All writing" />
+    <h2 id="journal-title" class="sr-only">The Journal</h2>
+
+    <ul class="mt-10 grid gap-x-8 md:grid-cols-3">
+      {
+        journal.map((article) => (
+          <li class="rule-t">
+            <a href={`/journal/${article.id}`} class="group block py-8">
+              <p class="label-sm text-ash">
+                {article.data.inPreparation ? 'In preparation' : article.data.subject}
+              </p>
+              <h3 class="display-3 mt-4 max-w-[26ch] text-parchment transition-colors group-hover:text-ivory">
+                {article.data.title}
+              </h3>
+              <p class="meta mt-3 max-w-[40ch] text-ash">{article.data.standfirst}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Private access -------------------------------------------------- -->
+  <section class="shell pt-24 pb-24 md:pt-32 md:pb-32" aria-labelledby="access-title">
+    <div class="rule-t pt-12 md:pt-16">
+      <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <h2 id="access-title" class="display-2 max-w-[19ch] text-ivory lg:col-span-7">
+          Advance notice, before the public catalogue.
+        </h2>
+        <div class="lg:col-span-5">
+          <p class="prose-fv">
+            Private Access is a short list of collectors who are told about selected acquisitions
+            first. It is not a newsletter, and it is not frequent.
+          </p>
+          <a href="/private-access" class="action mt-9">Request private access</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

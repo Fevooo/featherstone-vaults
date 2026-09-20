@@ -1,0 +1,135 @@
+---
+import Page from '../layouts/Page.astro';
+import EnquiryForm from '../components/forms/EnquiryForm.astro';
+import { BUDGET_RANGES } from '../consts';
+
+const considered = [
+  {
+    title: 'Individual objects',
+    body: 'A single object of genuine quality, whether or not it sits in a field we usually handle.',
+  },
+  {
+    title: 'Specialist collections',
+    body: 'Collections assembled in one field, where the coherence of the group is part of the value.',
+  },
+  {
+    title: 'Inherited collections',
+    body: 'Material coming out of an estate, often undocumented and often more significant than the family expects.',
+  },
+  {
+    title: 'Consignment',
+    body: 'We catalogue, photograph, research and offer the object; you retain ownership until it sells.',
+  },
+  {
+    title: 'Private sale',
+    body: 'Where discretion matters more than reach, we approach a small number of known collectors directly.',
+  },
+];
+---
+
+<Page
+  title="Sell an Object"
+  heading="Exceptional objects deserve informed stewardship."
+  eyebrow="Selling"
+  description="Featherstone Vaults considers individual objects, specialist collections and inherited collections for outright purchase, consignment or private sale."
+  path="/sell-an-object"
+  standfirst="Most people who contact us about selling have one of two things: an object they know is good, or a collection they have inherited and cannot assess. Both are worth a conversation, and the first conversation costs nothing."
+  trail={[{ label: 'Sell an Object', href: '/sell-an-object' }]}
+  headingWidth="20ch"
+>
+  <div class="shell">
+    <section class="rule-t pt-12" aria-labelledby="considered-heading">
+      <div class="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+        <h2 id="considered-heading" class="label-sm text-bronze-lit lg:col-span-3">
+          What we consider
+        </h2>
+        <div class="lg:col-span-8 lg:col-start-4">
+          <dl class="max-w-[40rem]">
+            {
+              considered.map((item) => (
+                <div class="rule-soft-t py-6 first:border-t-0 first:pt-0">
+                  <dt class="display-3 text-ivory">{item.title}</dt>
+                  <dd class="prose-fv mt-3">{item.body}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-20 md:pt-28" aria-labelledby="process-heading">
+      <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
+        <h2 id="process-heading" class="label-sm text-bronze-lit lg:col-span-3">The process</h2>
+        <div class="prose-fv max-w-[40rem] lg:col-span-8 lg:col-start-4">
+          <p>
+            Send photographs and whatever you know. We will tell you what we think the object is,
+            whether we are the right people to handle it, and what we would expect it to achieve.
+            If the answer is that it should go to a specialist auction department rather than to
+            us, we will say so and tell you which one.
+          </p>
+          <p>
+            Where we proceed, we set out the basis in writing before anything moves: outright
+            purchase at an agreed figure, or consignment at an agreed commission, with the
+            catalogue entry and reserve agreed with you.
+          </p>
+          <p>
+            We will ask about the object's history and about your title to it. This is not a
+            formality. We decline material where the ownership position cannot be established.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="submit" class="pt-24 pb-24 md:pt-32 md:pb-32" aria-labelledby="submit-heading">
+      <div class="rule-t pt-12">
+        <div class="grid gap-x-16 gap-y-8 lg:grid-cols-12">
+          <h2 id="submit-heading" class="label-sm text-bronze-lit lg:col-span-3">
+            Submit an object
+          </h2>
+          <div class="lg:col-span-9">
+            <p class="prose-fv max-w-[38rem]">
+              There is no obligation and no charge for an initial view. Everything you send is
+              treated as confidential.
+            </p>
+
+            <EnquiryForm
+              id="sell"
+              formName="sell-an-object"
+              submitLabel="Submit for consideration"
+              note="Submissions are reviewed personally. Photographs can follow by email once we reply; there is no upload here by design, so that nothing sensitive is posted to a form."
+              fields={[
+                { name: 'name', label: 'Name', required: true, autocomplete: 'name' },
+                { name: 'email', label: 'Email', type: 'email', required: true, autocomplete: 'email' },
+                { name: 'objectType', label: 'Object type', required: true, placeholder: 'e.g. fossil, manuscript, wristwatch' },
+                { name: 'value', label: 'Approximate value', type: 'select', options: BUDGET_RANGES },
+                {
+                  name: 'description',
+                  label: 'Description',
+                  type: 'textarea',
+                  required: true,
+                  rows: 5,
+                  placeholder: 'What it is, its size and condition, and anything that is marked or inscribed on it.',
+                },
+                {
+                  name: 'provenance',
+                  label: 'Known provenance',
+                  type: 'textarea',
+                  rows: 4,
+                  placeholder: 'How it came to you, and any paperwork, invoices, labels or letters that came with it.',
+                },
+                {
+                  name: 'photographs',
+                  label: 'Photographs',
+                  type: 'textarea',
+                  rows: 2,
+                  placeholder: 'Tell us what photographs you hold, or paste a link to a folder. We will ask for the files by email.',
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Page>

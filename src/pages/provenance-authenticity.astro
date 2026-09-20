@@ -1,0 +1,128 @@
+---
+import Page from '../layouts/Page.astro';
+
+const sections = [
+  {
+    heading: 'Documentary provenance',
+    body: [
+      'Provenance means the recorded history of an object: who owned it, when, and what evidence survives for each step. It is not a story. Where we publish a provenance, each element is something we have seen: an invoice, a catalogue entry, a label, a letter, an inventory number, a photograph, a customs document.',
+      'Copies of those records are supplied with the object. Where an element rests on a statement rather than a document, the entry says so.',
+    ],
+  },
+  {
+    heading: 'Ownership history and its gaps',
+    body: [
+      'Most objects have gaps. An object that surfaced in a private collection in the 1960s and has no record before that is a normal object, not a suspicious one, but the gap is part of the description and we state it plainly.',
+      'For antiquities in particular, the date at which an object can first be documented outside its country of origin materially affects what can be done with it. Where that date is later than a buyer might assume, we say so before an offer is made, not afterwards.',
+    ],
+  },
+  {
+    heading: 'Authenticity',
+    body: [
+      'Attributions are made on the evidence available and are expressed with the confidence that evidence supports. An object catalogued as being of a given period and culture is one we believe to be so on the basis of material, construction, style, surface and, where relevant, analysis.',
+      'Where an attribution is contested, uncertain or rests on a single opinion, the entry records that. Where an object has been tested, whether by thermoluminescence, metallurgical analysis, radiocarbon or spectroscopy, we name the laboratory and supply the report. We do not describe an object as certified when what exists is an opinion.',
+    ],
+  },
+  {
+    heading: 'Independent opinion',
+    body: [
+      'We consult external specialists where an object sits outside our direct experience, or where an independent view adds something a buyer should have. Those opinions are supplied as written, including where they are less favourable than we hoped.',
+      'A buyer is free to commission their own examination before completing, and we will make the object available for it.',
+    ],
+  },
+  {
+    heading: 'Condition reporting',
+    body: [
+      'Condition reports describe what is there: losses, breaks, repairs, restoration, replaced elements, retouching, cleaning, consolidation and later additions. Restoration is disclosed whether or not it is visible under normal light.',
+      'Reports are written to be read alongside photography that shows the same features. A report and a photograph that disagree are a failure of the report.',
+    ],
+  },
+  {
+    heading: 'Legal title',
+    body: [
+      'We satisfy ourselves as to the seller’s title before taking an object on, and we pass good title to the buyer. Where an object comes from an estate, we ask for evidence of the authority to sell.',
+      'We check relevant loss and theft registers as a matter of routine, and we record the date the check was made.',
+    ],
+  },
+  {
+    heading: 'Cultural property',
+    body: [
+      'Some categories of object are subject to national ownership laws, export prohibitions and international conventions. We do not handle material that we believe to have been removed from its country of origin unlawfully, and we decline objects where the position cannot be established.',
+      'This is not only an ethical position. An object with an unresolved cultural property question is difficult to insure, difficult to lend, difficult to move across a border, and difficult to sell again.',
+    ],
+  },
+  {
+    heading: 'Import and export',
+    body: [
+      'Export from the United Kingdom can require a licence depending on an object’s age, value and category. Where a licence is required we identify it before sale and apply for it ourselves. A licence application can be refused or deferred, and the sale terms address what happens if it is.',
+      'Import requirements in the destination country are the buyer’s responsibility. We supply the documentation needed to satisfy them and will work directly with a buyer’s shipping agent or customs broker.',
+    ],
+  },
+  {
+    heading: 'What we do not claim',
+    body: [
+      'No dealer can guarantee that an attribution will never be revised. Scholarship moves, analytical methods improve, and objects that were confidently placed in one period are occasionally moved to another.',
+      'What we undertake is narrower and, we think, more useful: that the description is an honest account of what is known at the time of sale, that the evidence behind it is supplied, and that anything we are unsure about is identified as such. If an object we sold is later shown to have been misdescribed, we want to hear about it and we will deal with it.',
+    ],
+  },
+];
+---
+
+<Page
+  title="Provenance & Authenticity"
+  heading="Provenance & Authenticity."
+  eyebrow="Standards"
+  description="How Featherstone Vaults approaches provenance, authenticity, condition reporting, legal title, cultural property and export requirements."
+  path="/provenance-authenticity"
+  standfirst="This page sets out how we work. It is deliberately specific, because a general statement about integrity is worth nothing to a buyer trying to assess an object."
+  trail={[{ label: 'Provenance & Authenticity', href: '/provenance-authenticity' }]}
+  headingWidth="16ch"
+>
+  <div class="shell pb-24 md:pb-32">
+    <div class="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+      <nav aria-label="On this page" class="lg:col-span-3">
+        <h2 class="label-sm rule-t pt-6 text-bronze-lit">Contents</h2>
+        <ol class="mt-5 space-y-2.5 lg:sticky lg:top-32">
+          {
+            sections.map((s, i) => (
+              <li class="flex gap-3">
+                <span class="label-sm tnum mt-0.5 text-ash">{String(i + 1).padStart(2, '0')}</span>
+                <a
+                  href={`#${s.heading.toLowerCase().replace(/[^a-z]+/g, '-')}`}
+                  class="meta text-parchment transition-colors hover:text-ivory"
+                >
+                  {s.heading}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <div class="lg:col-span-8 lg:col-start-4">
+        {
+          sections.map((s, i) => (
+            <section id={s.heading.toLowerCase().replace(/[^a-z]+/g, '-')} class="rule-t py-10">
+              <p class="label-sm tnum text-ash">{String(i + 1).padStart(2, '0')}</p>
+              <h2 class="display-2 mt-4 max-w-[20ch] text-ivory">{s.heading}</h2>
+              <div class="prose-fv mt-6 max-w-[40rem]">
+                {s.body.map((p) => (
+                  <p>{p}</p>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+
+        <div class="rule-t pt-10">
+          <p class="prose-fv max-w-[40rem]">
+            If something on this page raises a question about an object you are considering, ask
+            it. A question about provenance is the most reasonable thing a buyer can ask, and a
+            dealer who is reluctant to answer it is telling you something.
+          </p>
+          <a href="/enquire" class="action mt-9">Make an enquiry</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Page>

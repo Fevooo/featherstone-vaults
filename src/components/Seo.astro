@@ -1,0 +1,58 @@
+---
+import { SITE } from '../consts';
+
+export interface Props {
+  title: string;
+  description: string;
+  /** Overrides the "<title> | Featherstone Vaults" pattern. */
+  fullTitle?: string;
+  path: string;
+  /** 'website' | 'article' | 'product' */
+  ogType?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  publishedTime?: Date;
+  modifiedTime?: Date;
+}
+
+const {
+  title,
+  description,
+  fullTitle,
+  path,
+  ogType = 'website',
+  ogImage = '/og/featherstone-vaults.png',
+  noindex = false,
+  publishedTime,
+  modifiedTime,
+} = Astro.props;
+
+const canonical = new URL(path, SITE.url).href.replace(/\/$/, '') || SITE.url;
+const resolvedTitle = fullTitle ?? `${title} · ${SITE.name}`;
+const ogImageUrl = new URL(ogImage, SITE.url).href;
+---
+
+<title>{resolvedTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{noindex && <meta name="robots" content="noindex, follow" />}
+{!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+
+<meta property="og:type" content={ogType} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={resolvedTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="en_GB" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={resolvedTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+{publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+{modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}

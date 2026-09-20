@@ -1,0 +1,72 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+
+const sections = [
+  {
+    heading: 'What this covers',
+    body: [
+      'This notice explains what personal information Featherstone Vaults collects through featherstonevaults.com, why, and what you can do about it.',
+      'Featherstone Vaults is the data controller for that information.',
+    ],
+  },
+  {
+    heading: 'What we collect',
+    body: [
+      'Only what you send us. When you submit a form, we receive the fields you completed: typically your name, email address, the subject of the enquiry and anything you wrote in the message.',
+      'For Private Access we also hold the collecting interests you selected and, if you gave one, your typical acquisition range.',
+    ],
+    list: [
+      'We do not run analytics, advertising or tracking scripts on this site.',
+      'We do not set cookies for marketing or measurement.',
+      'We do not build profiles or use automated decision-making.',
+    ],
+  },
+  {
+    heading: 'Why we hold it',
+    body: [
+      'To answer your enquiry, to carry out a search you have asked us to carry out, and to send Private Access notices where you have requested them.',
+      'The lawful basis is our legitimate interest in responding to an enquiry you initiated, and your consent where you have asked to join Private Access. Where a transaction proceeds, we also hold what anti-money-laundering and tax law requires us to hold.',
+    ],
+  },
+  {
+    heading: 'Who sees it',
+    body: [
+      'Only Featherstone Vaults. Enquiries are not shared with other dealers, and the Private Access list is never sold, rented or exchanged.',
+      'Our email and hosting providers process the information on our behalf under contract. Where a transaction requires it, information may be shared with a shipper, an insurer or a regulator.',
+    ],
+  },
+  {
+    heading: 'How long we keep it',
+    body: [
+      'Enquiries that do not lead anywhere are deleted after two years. Private Access records are held until you ask to be removed.',
+      'Records relating to a completed transaction are kept for the period required by tax and anti-money-laundering law, which is currently six years from the end of the relevant period.',
+    ],
+  },
+  {
+    heading: 'Your rights',
+    body: [
+      'You can ask for a copy of what we hold about you, ask for it to be corrected, or ask for it to be deleted. Where you have consented to Private Access you can withdraw that consent at any time, and the record is deleted rather than merely suppressed.',
+      'Write to enquiries@featherstonevaults.com. We will respond within one month.',
+      'If you are not satisfied with how we have handled a request, you can complain to the Information Commissioner’s Office at ico.org.uk.',
+    ],
+  },
+  {
+    heading: 'Security',
+    body: [
+      'The site is served over HTTPS and form submissions are encrypted in transit. Enquiry records are held on access-controlled systems.',
+      'Please do not send identity documents, bank details or other sensitive material through a web form. We will tell you how to send those securely when they are needed.',
+    ],
+  },
+];
+---
+
+<LegalPage
+  title="Privacy"
+  heading="Privacy."
+  eyebrow="Information"
+  description="What personal information Featherstone Vaults collects through this site, why it is held, who sees it, how long it is kept and how to have it removed."
+  path="/privacy"
+  standfirst="This site collects only what you send it. There is no analytics, no advertising and no tracking."
+  sections={sections}
+  footnote="This notice is a working draft and should be reviewed against the business's actual data processing before the site is relied upon commercially."
+/>

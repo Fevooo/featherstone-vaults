@@ -1,0 +1,154 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { SITE } from '../../consts';
+import { getJournal, formatDate, type JournalEntry } from '../../lib/catalogue';
+
+export const getStaticPaths = (async () => {
+  const articles = await getJournal();
+  return articles.map((article, i) => ({
+    params: { slug: article.id },
+    props: {
+      article,
+      next: articles[i + 1] ?? articles[0],
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  article: JournalEntry;
+  next: JournalEntry;
+}
+
+const { article, next } = Astro.props;
+const d = article.data;
+const path = `/journal/${article.id}`;
+const { Content } = await render(article);
+
+const articleJsonLd = d.inPreparation
+  ? null
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: d.title,
+      description: d.seoDescription,
+      articleSection: d.subject,
+      url: new URL(path, SITE.url).href,
+      datePublished: d.published?.toISOString(),
+      dateModified: (d.updated ?? d.published)?.toISOString(),
+      author: { '@id': `${SITE.url}/#organization` },
+      publisher: { '@id': `${SITE.url}/#organization` },
+      isAccessibleForFree: true,
+      inLanguage: 'en-GB',
+    };
+---
+
+<Base
+  title={d.seoTitle ?? d.title}
+  description={d.seoDescription}
+  path={path}
+  ogType="article"
+  noindex={d.inPreparation}
+  publishedTime={d.published}
+  modifiedTime={d.updated ?? d.published}
+>
+  <div class="shell">
+    <Breadcrumbs
+      class="pt-8 md:pt-10"
+      trail={[
+        { label: 'Journal', href: '/journal' },
+        { label: d.title, href: path },
+      ]}
+    />
+
+    <article>
+      <header class="pt-12 pb-10 md:pt-16">
+        <p class="label-sm text-bronze-lit">{d.subject}</p>
+        <h1 class="display-1 mt-7 max-w-[20ch] text-ivory">{d.title}</h1>
+        <p class="prose-fv mt-8 max-w-[38rem] text-parchment md:mt-10">{d.standfirst}</p>
+      </header>
+
+      {
+        d.inPreparation ? (
+          <div class="rule-t py-12 md:py-16">
+            <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+              <p class="label-sm text-bronze-lit lg:col-span-3">In preparation</p>
+              <div class="lg:col-span-8 lg:col-start-4">
+                <p class="prose-fv">
+                  This article is being researched and has not been published. We would rather
+                  leave a subject unwritten than publish something we cannot support from the
+                  sources. It will appear here when the research is finished.
+                </p>
+                <p class="prose-fv mt-6">
+                  If the subject is directly relevant to something you are considering, write to us
+                  and we will answer the specific question rather than wait for the article.
+                </p>
+                <div class="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-8">
+                  <a href="/enquire" class="action">Ask the question directly</a>
+                  <a href="/private-access" class="action-quiet">
+                    Be told when it is published
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div class="grid gap-x-16 gap-y-8 rule-t pt-12 md:pt-16 lg:grid-cols-12">
+            <aside class="lg:col-span-3">
+              <dl class="lg:sticky lg:top-32">
+                {d.published && (
+                  <div class="rule-soft-t py-3 first:border-t-0 first:pt-0">
+                    <dt class="label-sm text-ash">Published</dt>
+                    <dd class="meta mt-1 text-parchment">
+                      <time datetime={d.published.toISOString().slice(0, 10)}>
+                        {formatDate(d.published)}
+                      </time>
+                    </dd>
+                  </div>
+                )}
+                <div class="rule-soft-t py-3">
+                  <dt class="label-sm text-ash">Subject</dt>
+                  <dd class="meta mt-1 text-parchment">{d.subject}</dd>
+                </div>
+                {d.readingTime && (
+                  <div class="rule-soft-t py-3">
+                    <dt class="label-sm text-ash">Reading time</dt>
+                    <dd class="meta mt-1 text-parchment">{d.readingTime}</dd>
+                  </div>
+                )}
+              </dl>
+            </aside>
+            <div class="lg:col-span-8 lg:col-start-4">
+              <div class="prose-fv">
+                <Content />
+              </div>
+              <img
+                src="/brand/icon-bronze.svg"
+                alt=""
+                width="22"
+                height="24"
+                loading="lazy"
+                class="mt-12 w-[1.375rem] opacity-70"
+              />
+            </div>
+          </div>
+        )
+      }
+    </article>
+
+    <nav aria-label="More writing" class="mt-20 rule-t pt-8 pb-24 md:mt-28 md:pb-32">
+      <p class="label-sm text-ash">Next</p>
+      <a href={`/journal/${next.id}`} class="group mt-5 block">
+        <h2 class="display-2 max-w-[24ch] text-parchment transition-colors group-hover:text-ivory">
+          {next.data.title}
+        </h2>
+        <p class="meta mt-4 max-w-[46ch] text-ash">{next.data.standfirst}</p>
+      </a>
+      <a href="/journal" class="action-quiet mt-10">All writing</a>
+    </nav>
+  </div>
+
+  {articleJsonLd && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} is:inline />}
+</Base>

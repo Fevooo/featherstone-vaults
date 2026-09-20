@@ -1,0 +1,22 @@
+#:schema node_modules/wrangler/config-schema.json
+# Cloudflare Pages project configuration.
+#
+# The site is fully static; `dist` is the build output and the root-level
+# `functions/` directory is deployed as Pages Functions (the enquiry endpoint).
+#
+# Build settings in the Cloudflare dashboard:
+#   Framework preset      Astro
+#   Build command         npm run build
+#   Build output          dist
+#   Node version          22 (NODE_VERSION build variable)
+#
+# Secrets to set under Settings → Environment variables before the enquiry
+# forms will deliver. Until they are set the endpoint returns a clear message
+# asking the sender to email directly, so nothing is silently lost.
+#   RESEND_API_KEY
+#   ENQUIRY_TO
+#   ENQUIRY_FROM
+
+name = "featherstone-vaults"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"

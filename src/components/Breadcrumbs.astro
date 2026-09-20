@@ -1,0 +1,49 @@
+---
+import { SITE } from '../consts';
+
+export interface Crumb {
+  label: string;
+  href: string;
+}
+interface Props {
+  trail: Crumb[];
+  class?: string;
+}
+const { trail, class: className = '' } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [{ label: 'Home', href: '/' }, ...trail].map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.label,
+    item: new URL(c.href, SITE.url).href.replace(/\/$/, '') || SITE.url,
+  })),
+};
+---
+
+<nav aria-label="Breadcrumb" class:list={['label-sm', className]}>
+  <ol class="flex flex-wrap items-center gap-x-3 gap-y-1 text-ash">
+    <li><a href="/" class="transition-colors hover:text-parchment">Home</a></li>
+    {
+      trail.map((crumb, i) => (
+        <>
+          <li aria-hidden="true" class="text-ash/60">/</li>
+          <li>
+            {i === trail.length - 1 ? (
+              <span class="text-ash" aria-current="page">
+                {crumb.label}
+              </span>
+            ) : (
+              <a href={crumb.href} class="transition-colors hover:text-parchment">
+                {crumb.label}
+              </a>
+            )}
+          </li>
+        </>
+      ))
+    }
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />

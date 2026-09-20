@@ -1,0 +1,90 @@
+---
+import Page from '../layouts/Page.astro';
+
+const stages = [
+  {
+    title: 'Assessment',
+    body: 'We examine the object, research what can be established about it, and give you a written view of what it is and what we expect it to achieve. If consignment is not the right route, we say so.',
+  },
+  {
+    title: 'Terms',
+    body: 'Commission, reserve, duration and the basis on which the object is held are agreed in writing before anything moves. There are no separate charges for cataloguing, photography or research.',
+  },
+  {
+    title: 'Cataloguing',
+    body: 'The object is catalogued to the same standard as our own stock: classification, condition report, measurements, documentary position and photography. You approve the entry before it is published.',
+  },
+  {
+    title: 'Offering',
+    body: 'The object is offered through the catalogue, to the Private Access list, and directly to collectors we believe are the right buyers for it.',
+  },
+  {
+    title: 'Settlement',
+    body: 'You are paid on cleared funds, within the period set out in the agreement. You retain ownership until then and can withdraw the object on notice.',
+  },
+];
+---
+
+<Page
+  title="Consignments"
+  heading="Consignment."
+  eyebrow="Services"
+  description="Consignment terms at Featherstone Vaults: assessment, written terms, full cataloguing and photography, offering and settlement. Ownership is retained until sale."
+  path="/consignments"
+  standfirst="Consignment suits an owner who wants an object properly catalogued and placed with the right buyer, and who is not in a hurry. You keep ownership until it sells."
+  trail={[{ label: 'Consignments', href: '/consignments' }]}
+  headingWidth="14ch"
+>
+  <div class="shell pb-24 md:pb-32">
+    <section class="rule-t pt-12" aria-labelledby="stages-heading">
+      <div class="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+        <h2 id="stages-heading" class="label-sm text-bronze-lit lg:col-span-3">How it runs</h2>
+        <ol class="lg:col-span-8 lg:col-start-4">
+          {
+            stages.map((s, i) => (
+              <li class="rule-soft-t py-7 first:border-t-0 first:pt-0">
+                <p class="label-sm tnum text-ash">{String(i + 1).padStart(2, '0')}</p>
+                <h3 class="display-3 mt-3 text-ivory">{s.title}</h3>
+                <p class="prose-fv mt-3 max-w-[40rem]">{s.body}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="pt-20 md:pt-28" aria-labelledby="care-heading">
+      <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
+        <h2 id="care-heading" class="label-sm text-bronze-lit lg:col-span-3">While we hold it</h2>
+        <div class="prose-fv max-w-[40rem] lg:col-span-8 lg:col-start-4">
+          <p>
+            Consigned objects are held in secure, environmentally stable storage and are insured
+            for the agreed value from the moment they arrive. They are not lent, displayed
+            publicly, or subjected to any treatment without your written agreement.
+          </p>
+          <p>
+            Where conservation would materially improve the result, we will tell you what we
+            recommend, what it costs and what it would change. The decision is yours, and we are
+            equally content to offer an object exactly as it came to us.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="pt-20 md:pt-28">
+      <div class="rule-t pt-12">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <h2 class="display-2 max-w-[18ch] text-ivory lg:col-span-6">
+            Start with a description and a photograph.
+          </h2>
+          <div class="lg:col-span-6">
+            <p class="prose-fv">
+              There is no charge for an initial view, and no obligation whichever way it goes.
+            </p>
+            <a href="/sell-an-object#submit" class="action mt-9">Submit an object</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Page>

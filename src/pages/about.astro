@@ -1,0 +1,156 @@
+---
+import Page from '../layouts/Page.astro';
+import Plate from '../components/Plate.astro';
+import { SITE } from '../consts';
+
+const principles = [
+  {
+    title: 'Curation',
+    body: [
+      'We take on few objects. An object is accepted because it is worth owning, not because it will move.',
+      'That means declining a good deal of perfectly saleable material, and it means the catalogue is often short.',
+    ],
+  },
+  {
+    title: 'Authenticity',
+    body: [
+      'Attribution, condition and restoration are described as they are, at the point of sale, in writing.',
+      'Where something is uncertain, the entry says it is uncertain. Where an opinion is one specialist’s rather than a settled view, the entry says whose.',
+    ],
+  },
+  {
+    title: 'History',
+    body: [
+      'Ownership history is researched before an object is offered, and the records are supplied with it.',
+      'The documentary position is the part of an object that cannot be improved later. It is where most of our time goes.',
+    ],
+  },
+];
+
+const roles = [
+  {
+    title: 'Curator',
+    body: 'Selecting, researching and cataloguing objects to a consistent standard, whether they are worth one thousand pounds or one hundred thousand.',
+  },
+  {
+    title: 'Dealer',
+    body: 'Holding objects on our own account and offering them openly, with our interest disclosed.',
+  },
+  {
+    title: 'Sourcing house',
+    body: 'Acting for collectors who are looking for something specific, through channels that are not public.',
+  },
+  {
+    title: 'Collector service',
+    body: 'Advising on collections already assembled: documentation, condition, insurance valuation, division and eventual sale.',
+  },
+];
+---
+
+<Page
+  title="About"
+  heading="Featherstone Vaults."
+  eyebrow="The house"
+  description="Featherstone Vaults is a curator, dealer and private sourcing house for significant historical and scientific objects. The Cotswolds, working internationally."
+  path="/about"
+  standfirst="A private dealer and collection house for historically, scientifically and culturally significant objects. We work from the Cotswolds with collectors internationally."
+  trail={[{ label: 'About', href: '/about' }]}
+  headingWidth="16ch"
+>
+  <div class="shell">
+    <!-- Principles ------------------------------------------------ -->
+    <section class="rule-t pt-12" aria-labelledby="principles-heading">
+      <h2 id="principles-heading" class="label-sm text-bronze-lit">Three principles</h2>
+      <dl class="mt-12 grid gap-x-10 gap-y-12 md:grid-cols-3">
+        {
+          principles.map((p, i) => (
+            <div class="rule-t pt-6">
+              <p class="label-sm tnum text-ash">{String(i + 1).padStart(2, '0')}</p>
+              <dt class="display-2 mt-4 text-ivory">{p.title}</dt>
+              <dd class="prose-fv mt-5 max-w-none">
+                {p.body.map((line) => (
+                  <p>{line}</p>
+                ))}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <!-- What we are ----------------------------------------------- -->
+    <section class="pt-24 md:pt-32" aria-labelledby="roles-heading">
+      <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
+        <h2 id="roles-heading" class="label-sm text-bronze-lit lg:col-span-3">What we are</h2>
+        <div class="lg:col-span-8 lg:col-start-4">
+          <p class="prose-fv max-w-[40rem]">
+            Featherstone Vaults operates in four capacities. They overlap, and we are explicit
+            about which one applies to any given object or conversation.
+          </p>
+          <dl class="mt-10 max-w-[40rem]">
+            {
+              roles.map((r) => (
+                <div class="rule-soft-t py-6">
+                  <dt class="display-3 text-ivory">{r.title}</dt>
+                  <dd class="prose-fv mt-3">{r.body}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- The Cotswolds ---------------------------------------------- -->
+    <section class="pt-24 md:pt-32" aria-labelledby="place-heading">
+      <div class="grid items-center gap-x-16 gap-y-12 rule-t pt-12 lg:grid-cols-12">
+        <div class="lg:col-span-6">
+          <h2 id="place-heading" class="display-1 max-w-[14ch] text-ivory">
+            Rooted in history. At home in the Cotswolds.
+          </h2>
+          <p class="prose-fv mt-8">A local presence. A global perspective.</p>
+          <p class="prose-fv mt-5">
+            Objects are held, examined and photographed here. Collectors are welcome by
+            appointment, and a great many transactions are concluded without anyone travelling at
+            all. Where an object should be seen in person before a decision, we will say so.
+          </p>
+          <p class="label-sm mt-10 text-ash">
+            {SITE.locality}<span class="mx-3 opacity-50" aria-hidden="true">·</span>{SITE.country}
+          </p>
+        </div>
+        <div class="lg:col-span-6">
+          <Plate ratio="4 / 3" tone="3" sizes="(min-width: 1024px) 46vw, 100vw" />
+          <p class="meta mt-4 text-ash">Photography of the premises to follow.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Working with us -------------------------------------------- -->
+    <section class="pt-24 pb-24 md:pt-32 md:pb-32" aria-labelledby="working-heading">
+      <div class="rule-t pt-12">
+        <div class="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+          <h2 id="working-heading" class="label-sm text-bronze-lit lg:col-span-3">
+            Working with us
+          </h2>
+          <div class="lg:col-span-8 lg:col-start-4">
+            <div class="prose-fv max-w-[40rem]">
+              <p>
+                There is no membership, no minimum and no pressure to move quickly. Collectors at
+                the beginning of a collection are as welcome as institutions, and the standard of
+                cataloguing is the same either way.
+              </p>
+              <p>
+                The one thing we ask is directness. Tell us what you are actually looking for and
+                what you are prepared to spend, and we will tell you honestly whether we can help.
+              </p>
+            </div>
+            <div class="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-8">
+              <a href="/enquire" class="action action-solid">Make an enquiry</a>
+              <a href="/provenance-authenticity" class="action-quiet">Our standards</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Page>

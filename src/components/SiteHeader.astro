@@ -1,0 +1,146 @@
+---
+import { NAV_PRIMARY, NAV_ACTIONS, SITE } from '../consts';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href || (href !== '/' && path.startsWith(href + '/'));
+---
+
+<header class="sticky top-0 z-50 bg-ink/92 backdrop-blur-[2px] rule-b" data-site-header>
+  <div class="shell">
+    <div class="flex h-[4.5rem] items-center justify-between gap-6 lg:h-[5.25rem]">
+      <a
+        href="/"
+        class="shrink-0 transition-opacity hover:opacity-80"
+        aria-label={`${SITE.name}, home`}
+      >
+        <img
+          src="/brand/wordmark-ivory.svg"
+          alt={SITE.name}
+          width="198"
+          height="11"
+          class="w-[9.25rem] sm:w-[11rem] lg:w-[12.375rem]"
+          fetchpriority="high"
+        />
+      </a>
+
+      <nav aria-label="Primary" class="hidden lg:block">
+        <ul class="flex items-center gap-x-9">
+          {
+            NAV_PRIMARY.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class="nav-link"
+                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="hidden items-center gap-x-7 lg:flex">
+        <a href={NAV_ACTIONS[0].href} class="nav-link">{NAV_ACTIONS[0].label}</a>
+        <a
+          href={NAV_ACTIONS[1].href}
+          class="label-sm border border-[var(--line-strong)] px-4 py-2.5 text-parchment transition-colors hover:border-bronze hover:text-ivory"
+        >
+          {NAV_ACTIONS[1].label}
+        </a>
+      </div>
+
+      <button
+        type="button"
+        class="label-sm -mr-1 flex items-center gap-2.5 py-2 pl-2 text-parchment lg:hidden"
+        aria-expanded="false"
+        aria-controls="site-menu"
+        data-menu-toggle
+      >
+        <span class="sr-only">Open menu</span>
+        <span aria-hidden="true" class="flex w-5 flex-col gap-[5px]">
+          <span class="block h-px w-full bg-current"></span>
+          <span class="block h-px w-full bg-current"></span>
+        </span>
+        <span aria-hidden="true">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Full-screen mobile menu -->
+<div
+  id="site-menu"
+  class="invisible fixed inset-0 z-[60] flex flex-col bg-ink opacity-0 transition-[opacity,visibility] duration-300 lg:hidden"
+  data-menu-panel
+>
+  <div class="shell">
+    <div class="flex h-[4.5rem] items-center justify-between rule-b">
+      <img
+        src="/brand/wordmark-ivory.svg"
+        alt={SITE.name}
+        width="148"
+        height="8"
+        class="w-[9.25rem] sm:w-[11rem]"
+      />
+      <button type="button" class="label-sm -mr-1 py-2 pl-3 text-parchment" data-menu-close>
+        Close
+      </button>
+    </div>
+  </div>
+
+  <nav aria-label="Mobile" class="shell flex-1 overflow-y-auto pt-10 pb-16">
+    <ul>
+      {
+        NAV_PRIMARY.map((item) => (
+          <li class="rule-soft-t first:border-t-0">
+            <a
+              href={item.href}
+              class="display-2 block py-4 text-ivory"
+              aria-current={isCurrent(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mt-12 flex flex-col items-start gap-4">
+      <a href={NAV_ACTIONS[1].href} class="action action-solid w-full justify-center">
+        {NAV_ACTIONS[1].label}
+      </a>
+      <a href={NAV_ACTIONS[0].href} class="action w-full justify-center">{NAV_ACTIONS[0].label}</a>
+    </div>
+
+    <p class="label-sm mt-12 text-ash">
+      {SITE.locality}<br />{SITE.country}
+    </p>
+  </nav>
+</div>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
+  const close = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+
+  if (toggle && panel && close) {
+    const open = (next: boolean) => {
+      panel.classList.toggle('invisible', !next);
+      panel.classList.toggle('opacity-0', !next);
+      toggle.setAttribute('aria-expanded', String(next));
+      document.documentElement.style.overflow = next ? 'hidden' : '';
+      if (next) close.focus();
+      else toggle.focus();
+    };
+    toggle.addEventListener('click', () => open(true));
+    close.addEventListener('click', () => open(false));
+    panel.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) open(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') open(false);
+    });
+  }
+</script>

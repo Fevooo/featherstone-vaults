@@ -1,0 +1,7 @@
+# featherstonevaults.com
+# All legitimate crawlers, including AI search and answer engines, are welcome.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://featherstonevaults.com/sitemap.xml

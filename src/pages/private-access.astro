@@ -1,0 +1,88 @@
+---
+import Page from '../layouts/Page.astro';
+import EnquiryForm from '../components/forms/EnquiryForm.astro';
+import { COLLECTOR_INTERESTS, BUDGET_RANGES } from '../consts';
+---
+
+<Page
+  title="Private Access"
+  heading="Private Access."
+  eyebrow="Collector list"
+  description="Advance notice of selected Featherstone Vaults acquisitions, before they enter the public catalogue. An invitation-based collector list, not a newsletter."
+  path="/private-access"
+  standfirst="Receive advance notice of selected acquisitions before they enter the public catalogue."
+  trail={[{ label: 'Private Access', href: '/private-access' }]}
+  headingWidth="14ch"
+>
+  <div class="shell">
+    <div class="grid gap-x-16 gap-y-12 rule-t pt-12 lg:grid-cols-12">
+      <h2 class="label-sm text-bronze-lit lg:col-span-3">What it is</h2>
+      <div class="lg:col-span-8 lg:col-start-4">
+        <div class="prose-fv max-w-[40rem]">
+          <p>
+            Private Access is a short list of collectors who are told about selected objects first.
+            Notices go out when there is something specific to say, which is rarely more than once
+            a month and is sometimes much less often.
+          </p>
+          <p>
+            You tell us the departments you follow, and the level you buy at if you wish. We use
+            that to decide what is worth sending you. Most people on the list hear from us about
+            two or three objects a year, and those are the right ones.
+          </p>
+          <p>
+            No object is ever held back from the public catalogue indefinitely. Private Access
+            simply means the notice comes earlier.
+          </p>
+        </div>
+
+        <h3 class="label-sm mt-14 text-ash">What we do not do</h3>
+        <ul class="prose-fv mt-5 max-w-[40rem]">
+          <li>Sell, rent or share the list.</li>
+          <li>Send marketing that is not about a specific object.</li>
+          <li>Use the acquisition range for anything other than deciding what to send.</li>
+        </ul>
+      </div>
+    </div>
+
+    <section id="request" class="pt-24 pb-24 md:pt-32 md:pb-32" aria-labelledby="request-heading">
+      <div class="rule-t pt-12">
+        <div class="grid gap-x-16 gap-y-8 lg:grid-cols-12">
+          <h2 id="request-heading" class="label-sm text-bronze-lit lg:col-span-3">
+            Request access
+          </h2>
+          <div class="lg:col-span-9">
+            <EnquiryForm
+              id="access"
+              formName="private-access"
+              submitLabel="Request private access"
+              note="Requests are reviewed personally. You can ask to be removed at any time and the record is deleted rather than suppressed."
+              checkboxes={{
+                legend: 'Collector interests',
+                name: 'interests',
+                options: COLLECTOR_INTERESTS,
+              }}
+              fields={[
+                { name: 'firstName', label: 'First name', required: true, autocomplete: 'given-name' },
+                { name: 'surname', label: 'Surname', required: true, autocomplete: 'family-name' },
+                {
+                  name: 'email',
+                  label: 'Email',
+                  type: 'email',
+                  required: true,
+                  autocomplete: 'email',
+                  full: true,
+                },
+                {
+                  name: 'range',
+                  label: 'Typical acquisition range',
+                  type: 'select',
+                  options: BUDGET_RANGES,
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Page>

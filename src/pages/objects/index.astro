@@ -1,0 +1,86 @@
+---
+import Page from '../../layouts/Page.astro';
+import ObjectTile from '../../components/ObjectTile.astro';
+import { getCurrentObjects, getDepartments, getArchivedObjects } from '../../lib/catalogue';
+
+const objects = await getCurrentObjects();
+const departments = await getDepartments();
+const archived = await getArchivedObjects();
+const present = new Set(objects.map((o) => o.data.collection));
+const available = departments.filter((d) => present.has(d.id));
+---
+
+<Page
+  title="Objects"
+  heading="The current catalogue."
+  eyebrow="Objects"
+  description="The objects currently held by Featherstone Vaults. Antiquities, natural history, rare books, timepieces, maritime and exploration material, catalogued individually."
+  path="/objects"
+  standfirst="Objects are listed as they are catalogued. Each entry carries its classification, condition and documentary position. Anything not yet established is shown as not yet established."
+  trail={[{ label: 'Objects', href: '/objects' }]}
+>
+  <div class="shell">
+    {
+      available.length > 0 && (
+        <nav aria-label="Filter by collection" class="rule-t rule-b py-5">
+          <ul class="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <li class="label-sm text-ash">All objects</li>
+            {available.map((d) => (
+              <li>
+                <a href={`/collections/${d.id}`} class="label-sm text-parchment transition-colors hover:text-ivory">
+                  {d.data.shortTitle ?? d.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+
+    <h2 class="sr-only">Current catalogue</h2>
+    <p class="meta mt-6 max-w-[46rem] text-ash">
+        Catalogue plates are shown blank. Featherstone Vaults photography is in production and will
+        replace them entry by entry; no stand-in imagery is used.
+      </p>
+
+    <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-16 md:grid-cols-3 md:gap-x-7 lg:grid-cols-4 lg:gap-x-8">
+      {
+        objects.map((object, i) => (
+          <ObjectTile
+            object={object}
+            loading={i < 4 ? 'eager' : 'lazy'}
+            sizes="(min-width: 1024px) 23vw, (min-width: 768px) 30vw, 45vw"
+          />
+        ))
+      }
+    </div>
+
+    {
+      objects.length === 0 && (
+        <p class="prose-fv mt-14">
+          There is nothing in the public catalogue at present. Objects are added as they are
+          catalogued. Collectors on the Private Access list are told first.
+        </p>
+      )
+    }
+
+    <div class="mt-24 rule-t py-10 md:mt-32">
+      <div class="grid gap-8 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-5">
+          <h2 class="display-2 text-ivory">The archive.</h2>
+        </div>
+        <div class="lg:col-span-7">
+          <p class="prose-fv">
+            Objects that have been sold are not removed. Their entries are kept permanently, so
+            that the record of what passed through the house remains available to future owners
+            and researchers. <span class="tnum">{archived.length}</span>{' '}
+            {archived.length === 1 ? 'entry is' : 'entries are'} held in the archive.
+          </p>
+          <a href="/archive" class="action-quiet mt-8">View the archive</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pb-24 md:pb-32"></div>
+</Page>

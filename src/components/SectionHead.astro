@@ -1,0 +1,45 @@
+---
+interface Props {
+  /** Small letterspaced label in the left column. */
+  eyebrow: string;
+  heading?: string;
+  /** Short standfirst set beneath the heading. */
+  intro?: string;
+  /** Optional quiet link, right aligned on wide viewports. */
+  linkHref?: string;
+  linkLabel?: string;
+  as?: 'h1' | 'h2';
+  class?: string;
+}
+const {
+  eyebrow,
+  heading,
+  intro,
+  linkHref,
+  linkLabel,
+  as: Tag = 'h2',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['rule-t pt-6 md:pt-8', className]}>
+  <div class="grid gap-x-8 gap-y-6 md:grid-cols-12">
+    <p class="label-sm text-bronze-lit md:col-span-3 lg:col-span-2">{eyebrow}</p>
+
+    <div class="md:col-span-9 lg:col-span-10">
+      <div
+        class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12"
+      >
+        {heading && <Tag class="display-2 max-w-[22ch] text-ivory">{heading}</Tag>}
+        {
+          linkHref && linkLabel && (
+            <a href={linkHref} class="action-quiet shrink-0 self-start lg:mb-2 lg:self-auto">
+              {linkLabel}
+            </a>
+          )
+        }
+      </div>
+      {intro && <p class="prose-fv mt-6 max-w-[42rem]">{intro}</p>}
+    </div>
+  </div>
+</div>

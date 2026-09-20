@@ -1,0 +1,60 @@
+---
+import Plate from './Plate.astro';
+import {
+  formatPrice,
+  classificationLine,
+  AVAILABILITY_LABEL,
+  type ObjectEntry,
+} from '../lib/catalogue';
+
+interface Props {
+  object: ObjectEntry;
+  ratio?: string;
+  sizes?: string;
+  tone?: '1' | '2' | '3' | '4';
+  loading?: 'eager' | 'lazy';
+}
+const { object, ratio = '4 / 5', sizes, tone, loading } = Astro.props;
+const d = object.data;
+const image = d.images[0];
+const plateTone = tone ?? '1';
+/* 'Sold' is already carried by the price line, so the badge marks the
+   states that the price line does not. */
+const showStatus = d.availability === 'RESERVED' || d.availability === 'PRIVATE';
+---
+
+<article class="stretch-host group relative">
+  <a href={`/objects/${object.id}`} class="stretch block focus:outline-none">
+    <span class="sr-only">{d.title}, catalogue number {d.catalogueNumber}</span>
+  </a>
+
+  <div class="relative">
+    <Plate
+      ratio={ratio}
+      tone={plateTone}
+      image={image?.src}
+      alt={image?.alt ?? ''}
+      sizes={sizes}
+      loading={loading}
+      class="transition-[filter] duration-500 group-hover:brightness-[1.35]"
+    />
+    {
+      showStatus && (
+        <p class="label-sm absolute top-0 left-0 bg-ink/85 px-3 py-2 text-parchment">
+          {AVAILABILITY_LABEL[d.availability]}
+        </p>
+      )
+    }
+  </div>
+
+  <div class="mt-5">
+    <p class="label-sm tnum text-ash">{d.catalogueNumber}</p>
+    <h3
+      class="display-3 mt-2.5 min-h-[2.44em] text-parchment transition-colors duration-300 group-hover:text-ivory"
+    >
+      {d.title}
+    </h3>
+    <p class="meta mt-2 min-h-[3.2em] text-ash">{classificationLine(d)}</p>
+    <p class="meta price text-parchment">{formatPrice(d)}</p>
+  </div>
+</article>

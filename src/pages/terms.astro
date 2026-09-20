@@ -1,0 +1,74 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+
+const sections = [
+  {
+    heading: 'About these terms',
+    body: [
+      'These terms apply to the use of featherstonevaults.com and to enquiries made through it. They are a plain summary and are not a substitute for the sale terms that accompany a specific transaction.',
+      'The terms of sale for an individual object are set out in writing at the time, and those terms take precedence over anything on this page where the two differ.',
+    ],
+  },
+  {
+    heading: 'Catalogue entries',
+    body: [
+      'Catalogue entries are prepared honestly and carefully from the evidence available at the time of writing. Attributions represent our considered opinion, not a warranty that scholarship will never revise them.',
+      'Dimensions and weights are given as measured and may be approximate where an object is irregular. Descriptions of colour and surface are affected by photography and should be confirmed in person or by a condition report.',
+      'Where an entry is marked as a catalogue specimen it demonstrates the catalogue format and does not describe an object held or offered by Featherstone Vaults.',
+    ],
+  },
+  {
+    heading: 'Availability and pricing',
+    body: [
+      'Objects shown as available are offered subject to prior sale. An object marked reserved is under offer to another party.',
+      'Prices are in pounds sterling. Where a price is shown on application, it is given on request without obligation.',
+      'Nothing on this site is an offer capable of acceptance. A sale is concluded when we confirm it in writing.',
+    ],
+  },
+  {
+    heading: 'Payment and title',
+    body: [
+      'Payment is by bank transfer unless otherwise agreed. Title passes on receipt of cleared funds in full.',
+      'We do not accept cash above the threshold set by anti-money-laundering regulation, and we carry out identity and source-of-funds checks where the transaction requires them. We will tell you in advance when that applies.',
+    ],
+  },
+  {
+    heading: 'Enquiries and personal data',
+    body: [
+      'Information submitted through a form on this site is used to answer the enquiry and, where you have asked to join Private Access, to send notices about objects. It is not sold, rented or shared.',
+      'The privacy notice sets out what is held, for how long, and how to have it removed.',
+    ],
+  },
+  {
+    heading: 'Intellectual property',
+    body: [
+      'The Featherstone Vaults name, logo, catalogue entries, photography and written content on this site belong to Featherstone Vaults and may not be reproduced commercially without permission.',
+      'Quotation for the purposes of research, review or reporting is welcome with attribution.',
+    ],
+  },
+  {
+    heading: 'Liability',
+    body: [
+      'We take care that this site is accurate, but it is a catalogue rather than a reference work and we do not warrant that every statement is free of error. Where an error affects a transaction, it is dealt with under the sale terms.',
+      'Nothing here limits liability for fraud, for fraudulent misrepresentation, or for anything else that cannot be limited under the law of England and Wales.',
+    ],
+  },
+  {
+    heading: 'Governing law',
+    body: [
+      'These terms and any dispute arising from them are governed by the law of England and Wales, and the courts of England and Wales have exclusive jurisdiction.',
+    ],
+  },
+];
+---
+
+<LegalPage
+  title="Terms"
+  heading="Terms."
+  eyebrow="Information"
+  description="Terms governing the use of featherstonevaults.com and enquiries made through it, including catalogue entries, availability, payment, title and liability."
+  path="/terms"
+  standfirst="A plain summary of the terms on which this site is published and enquiries are handled. The sale terms for a specific object are agreed separately and in writing."
+  sections={sections}
+  footnote="These terms are a working draft and should be reviewed by a solicitor before the site is relied upon commercially."
+/>

@@ -1,0 +1,48 @@
+---
+import Base from './Base.astro';
+import Breadcrumbs, { type Crumb } from '../components/Breadcrumbs.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  /** Page heading — defaults to `title`. */
+  heading?: string;
+  /** Short letterspaced label above the heading. */
+  eyebrow?: string;
+  /** Standfirst paragraph beneath the heading. */
+  standfirst?: string;
+  trail?: Crumb[];
+  noindex?: boolean;
+  /** Constrains the heading measure. */
+  headingWidth?: string;
+}
+
+const {
+  title,
+  description,
+  path,
+  heading,
+  eyebrow,
+  standfirst,
+  trail = [],
+  noindex,
+  headingWidth = '18ch',
+} = Astro.props;
+---
+
+<Base title={title} description={description} path={path} noindex={noindex}>
+  <div class="shell">
+    {trail.length > 0 && <Breadcrumbs trail={trail} class="pt-8 md:pt-10" />}
+
+    <header class="pt-12 pb-12 md:pt-16 md:pb-16">
+      {eyebrow && <p class="label-sm mb-7 text-bronze-lit">{eyebrow}</p>}
+      <h1 class="display-1 text-ivory" style={`max-width:${headingWidth}`}>
+        {heading ?? title}
+      </h1>
+      {standfirst && <p class="prose-fv mt-8 max-w-[38rem] md:mt-10">{standfirst}</p>}
+    </header>
+  </div>
+
+  <slot />
+</Base>

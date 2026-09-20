@@ -1,0 +1,656 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------
+   Featherstone Vaults — design tokens
+   ------------------------------------------------------------------ */
+
+@theme {
+  /* Surfaces and ink */
+  --color-ink: #0b0b0a;
+  --color-charcoal: #131310;
+  --color-ivory: #efe9dd;
+  --color-parchment: #d7cbb9;
+  --color-bronze: #96774a;
+  --color-bronze-lit: #b2925f;
+  --color-stone: #80776a;
+  --color-ash: #aaa093;
+
+  /* Bronze dark enough to carry small type on ivory */
+  --color-bronze-deep: #6e5733;
+  --color-ink-soft: #4a443c;
+  --color-prose: #e7e0d4;
+
+  /* Type */
+  --font-display: 'Libre Caslon Display', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-text: 'Libre Caslon Text', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Jost', 'Avenir Next', 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  /* Editorial measure */
+  --spacing-gutter: 1.5rem;
+
+  --breakpoint-xs: 26rem;
+}
+
+/* ------------------------------------------------------------------
+   Fonts — self-hosted, latin subset
+   ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: 'Libre Caslon Display';
+  src: url('/fonts/caslon-display-400-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Libre Caslon Text';
+  src: url('/fonts/caslon-text-400-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Libre Caslon Text';
+  src: url('/fonts/caslon-text-400i-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Libre Caslon Text';
+  src: url('/fonts/caslon-text-700-latin.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Jost';
+  src: url('/fonts/jost-var-latin.woff2') format('woff2-variations');
+  font-weight: 300 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-radius: 0;
+  }
+
+  html {
+    background-color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-ivory);
+    font-family: var(--font-text);
+    font-size: 1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-bronze);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-bronze-lit);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  /* Catalogue figures always align */
+  .tnum,
+  time,
+  .price {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Rules and hairlines
+   ------------------------------------------------------------------ */
+
+@layer base {
+  :root {
+    /* Plate tones stand in for photography. They are declared here rather than
+       in @theme because they are referenced from inline styles, which Tailwind's
+       scanner cannot see. */
+    --color-plate-1: #161512;
+    --color-plate-2: #141414;
+    --color-plate-3: #181614;
+    --color-plate-4: #121311;
+
+    --line: color-mix(in srgb, var(--color-ivory) 13%, transparent);
+    --line-soft: color-mix(in srgb, var(--color-ivory) 8%, transparent);
+    --line-strong: color-mix(in srgb, var(--color-ivory) 22%, transparent);
+    --line-bronze: color-mix(in srgb, var(--color-bronze) 55%, transparent);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Components
+   ------------------------------------------------------------------ */
+
+@layer components {
+  /* --- Page shell ------------------------------------------------ */
+  .shell {
+    width: 100%;
+    max-width: 96rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 48rem) {
+    .shell {
+      padding-inline: 2.5rem;
+    }
+  }
+  @media (min-width: 80rem) {
+    .shell {
+      padding-inline: 4rem;
+    }
+  }
+  @media (min-width: 100rem) {
+    .shell {
+      padding-inline: 5.5rem;
+    }
+  }
+
+  .shell-narrow {
+    width: 100%;
+    max-width: 54rem;
+    margin-inline: auto;
+  }
+
+  /* --- Display type ---------------------------------------------- */
+  .display-hero {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6.1vw, 5rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .display-1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.2vw, 3.25rem);
+    line-height: 1.08;
+    letter-spacing: -0.012em;
+  }
+
+  .display-2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.625rem, 2.8vw, 2.25rem);
+    line-height: 1.14;
+    letter-spacing: -0.008em;
+  }
+
+  .display-3 {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+    line-height: 1.22;
+  }
+
+  /* --- Labels and metadata --------------------------------------- */
+  .label {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+
+  .label-sm {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+
+  .meta {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-link {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--color-parchment);
+    transition: color 220ms ease;
+  }
+  .nav-link:hover,
+  .nav-link[aria-current='page'] {
+    color: var(--color-ivory);
+  }
+  .nav-link[aria-current='page'] {
+    text-decoration: underline;
+    text-underline-offset: 0.5em;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--color-bronze);
+  }
+
+  /* --- Actions ---------------------------------------------------- */
+  .action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    white-space: nowrap;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 1rem 1.75rem;
+    border: 1px solid var(--line-strong);
+    color: var(--color-ivory);
+    background: transparent;
+    transition:
+      border-color 240ms ease,
+      background-color 240ms ease,
+      color 240ms ease;
+    cursor: pointer;
+  }
+  .action:hover {
+    border-color: var(--color-bronze);
+    background-color: color-mix(in srgb, var(--color-bronze) 12%, transparent);
+  }
+
+  .action-solid {
+    border-color: var(--color-ivory);
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+  }
+  .action-solid:hover {
+    background-color: var(--color-parchment);
+    border-color: var(--color-parchment);
+    color: var(--color-ink);
+  }
+
+  .action-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    white-space: nowrap;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-parchment);
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--line-bronze);
+    transition:
+      color 220ms ease,
+      border-color 220ms ease;
+  }
+  .action-quiet:hover {
+    color: var(--color-ivory);
+    border-color: var(--color-bronze-lit);
+  }
+
+  /* --- Prose ------------------------------------------------------ */
+  .prose-fv {
+    font-family: var(--font-text);
+    font-size: 1.0625rem;
+    line-height: 1.78;
+    color: var(--color-prose);
+    max-width: 38rem;
+  }
+  .prose-fv > * + * {
+    margin-top: 1.4em;
+  }
+  .prose-fv h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.25;
+    color: var(--color-ivory);
+    margin-top: 2.6em;
+    margin-bottom: -0.4em;
+  }
+  .prose-fv h3 {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-bronze-lit);
+    margin-top: 2.4em;
+    margin-bottom: -0.6em;
+  }
+  .prose-fv a {
+    color: var(--color-ivory);
+    border-bottom: 1px solid var(--line-bronze);
+    transition: border-color 200ms ease;
+  }
+  .prose-fv a:hover {
+    border-color: var(--color-bronze-lit);
+  }
+  .prose-fv strong {
+    font-weight: 700;
+    color: var(--color-ivory);
+  }
+  .prose-fv ul,
+  .prose-fv ol {
+    padding-left: 1.15rem;
+  }
+  .prose-fv li + li {
+    margin-top: 0.5em;
+  }
+  .prose-fv ul li {
+    list-style: none;
+    position: relative;
+  }
+  .prose-fv ul li::before {
+    content: '';
+    position: absolute;
+    left: -1.15rem;
+    top: 0.85em;
+    width: 0.4rem;
+    height: 1px;
+    background: var(--color-bronze);
+  }
+  .prose-fv ol {
+    list-style: decimal;
+  }
+  .prose-fv blockquote {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.45;
+    color: var(--color-ivory);
+    border-left: 1px solid var(--color-bronze);
+    padding-left: 1.5rem;
+    margin-block: 2.2em;
+  }
+
+  /* --- Field list (catalogue metadata) ---------------------------- */
+  .fieldlist {
+    border-top: 1px solid var(--line);
+  }
+  .fieldlist > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.15rem;
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  @media (min-width: 26rem) {
+    .fieldlist > div {
+      grid-template-columns: 9.5rem minmax(0, 1fr);
+      gap: 1.5rem;
+      align-items: baseline;
+    }
+  }
+  .fieldlist dt {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+  .fieldlist dd {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 300;
+    color: var(--color-ivory);
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* --- Forms ------------------------------------------------------ */
+  .field-label {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ash);
+    margin-bottom: 0.65rem;
+  }
+
+  .field-input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--line-strong);
+    padding: 0.55rem 0 0.7rem;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--color-ivory);
+    transition: border-color 220ms ease;
+  }
+  .field-input::placeholder {
+    color: color-mix(in srgb, var(--color-ash) 78%, transparent);
+  }
+  .field-input:hover {
+    border-color: var(--color-stone);
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-bronze-lit);
+  }
+  .field-input:focus-visible {
+    outline: 2px solid var(--color-bronze-lit);
+    outline-offset: 4px;
+  }
+  select.field-input {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-ash) 50%),
+      linear-gradient(135deg, var(--color-ash) 50%, transparent 50%);
+    background-position:
+      calc(100% - 9px) calc(50% + 1px),
+      calc(100% - 4px) calc(50% + 1px);
+    background-size:
+      5px 5px,
+      5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 1.75rem;
+    cursor: pointer;
+  }
+  select.field-input option {
+    background: var(--color-charcoal);
+    color: var(--color-ivory);
+  }
+  textarea.field-input {
+    border: 1px solid var(--line-strong);
+    padding: 0.85rem 1rem;
+    line-height: 1.65;
+    resize: vertical;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 0.55rem;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: var(--color-parchment);
+    transition: color 200ms ease;
+  }
+  .checkbox-row:hover {
+    color: var(--color-ivory);
+  }
+  .checkbox-row input {
+    appearance: none;
+    width: 0.9rem;
+    height: 0.9rem;
+    flex: none;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    cursor: pointer;
+    transition: all 180ms ease;
+  }
+  .checkbox-row input:checked {
+    background: var(--color-bronze);
+    border-color: var(--color-bronze);
+  }
+  .checkbox-row input:focus-visible {
+    outline: 2px solid var(--color-bronze-lit);
+    outline-offset: 3px;
+  }
+
+  /* --- Plate (stands in for photography) -------------------------- */
+  .plate {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-plate-1);
+    display: block;
+  }
+  .plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--line-soft);
+    pointer-events: none;
+  }
+
+  /* --- Inverted band: ink type on warm ivory ---------------------- */
+  .on-paper {
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+    --line: color-mix(in srgb, var(--color-ink) 18%, transparent);
+    --line-soft: color-mix(in srgb, var(--color-ink) 10%, transparent);
+    --line-strong: color-mix(in srgb, var(--color-ink) 30%, transparent);
+    --line-bronze: color-mix(in srgb, var(--color-bronze-deep) 55%, transparent);
+  }
+  .on-paper .prose-fv {
+    color: var(--color-ink-soft);
+  }
+  .on-paper .prose-fv a {
+    color: var(--color-ink);
+  }
+  .on-paper .action {
+    color: var(--color-ink);
+  }
+  .on-paper .action:hover {
+    background-color: color-mix(in srgb, var(--color-bronze-deep) 10%, transparent);
+    border-color: var(--color-bronze-deep);
+  }
+  .on-paper .action-solid {
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-ivory);
+  }
+  .on-paper .action-solid:hover {
+    background-color: var(--color-charcoal);
+    border-color: var(--color-charcoal);
+    color: var(--color-ivory);
+  }
+  .on-paper .action-quiet {
+    color: var(--color-ink-soft);
+  }
+  .on-paper .action-quiet:hover {
+    color: var(--color-ink);
+    border-color: var(--color-bronze-deep);
+  }
+  .on-paper :focus-visible {
+    outline-color: var(--color-bronze-deep);
+  }
+
+  /* --- Link that covers a whole panel ----------------------------- */
+  .stretch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  /* The link itself has no box worth outlining, so the ring is drawn
+     around the panel it covers. */
+  .stretch:focus-visible {
+    outline: none;
+  }
+  .stretch-host:has(.stretch:focus-visible) {
+    outline: 2px solid var(--color-bronze-lit);
+    outline-offset: 6px;
+  }
+}
+
+@layer utilities {
+  .rule-t {
+    border-top: 1px solid var(--line);
+  }
+  .rule-b {
+    border-bottom: 1px solid var(--line);
+  }
+  .rule-l {
+    border-left: 1px solid var(--line);
+  }
+  .rule-soft-t {
+    border-top: 1px solid var(--line-soft);
+  }
+  .bronze-rule {
+    width: 2.25rem;
+    height: 1px;
+    background: var(--color-bronze);
+  }
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+  }
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+}

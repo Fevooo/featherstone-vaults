@@ -1,0 +1,119 @@
+---
+import Page from '../layouts/Page.astro';
+import EnquiryForm from '../components/forms/EnquiryForm.astro';
+import { COLLECTOR_INTERESTS, BUDGET_RANGES } from '../consts';
+
+const areas = [
+  'Apollo and spaceflight material',
+  'Antiquities',
+  'Museum-grade fossils',
+  'Meteorites',
+  'Rare books',
+  'Manuscripts',
+  'Military watches',
+  'Polar exploration',
+  'Shipwreck artefacts',
+  'Significant historic objects',
+];
+---
+
+<Page
+  title="Private Acquisitions"
+  heading="Some objects are never publicly offered."
+  eyebrow="Private Sourcing"
+  description="Featherstone Vaults sources significant objects privately for collectors: antiquities, spaceflight material, meteorites, rare books and more."
+  path="/private-acquisitions"
+  standfirst="A substantial part of this market never reaches a public catalogue. Objects move between collections, estates, institutions and specialist dealers, often without ever being advertised. Where a collector is looking for something specific, we will look for it."
+  trail={[{ label: 'Private Acquisitions', href: '/private-acquisitions' }]}
+  headingWidth="17ch"
+>
+  <div class="shell">
+    <div class="grid gap-x-16 gap-y-12 rule-t pt-12 lg:grid-cols-12">
+      <h2 class="label-sm text-bronze-lit lg:col-span-3">How it works</h2>
+      <div class="lg:col-span-8 lg:col-start-4">
+        <div class="prose-fv max-w-[40rem]">
+          <p>
+            A private search begins with a conversation about what you are looking for and why. The
+            more precise the brief, the more useful the search: a period, a type, a condition
+            threshold, a documentary standard, a ceiling.
+          </p>
+          <p>
+            We then approach the sources we know. That means other dealers, private collections,
+            estates, specialist auction departments and, occasionally, institutions releasing
+            duplicate material. Some searches conclude in weeks. Some take years. Some conclude
+            with our telling you that what you want is not available at a price that makes sense,
+            which is a legitimate outcome.
+          </p>
+          <p>
+            Our interest is disclosed before anything is agreed. Where we are acting as an agent we
+            say so, and where we own the object we say that too.
+          </p>
+        </div>
+
+        <h3 class="label-sm mt-14 text-ash">Areas we search</h3>
+        <ul class="mt-6 grid max-w-[40rem] gap-x-10 sm:grid-cols-2">
+          {
+            areas.map((area) => (
+              <li class="meta rule-soft-t py-2.5 text-parchment">{area}</li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <section id="brief" class="pt-24 pb-24 md:pt-32 md:pb-32" aria-labelledby="brief-heading">
+      <div class="rule-t pt-12">
+        <div class="grid gap-x-16 gap-y-8 lg:grid-cols-12">
+          <div class="lg:col-span-3">
+            <h2 id="brief-heading" class="label-sm text-bronze-lit">Discuss an acquisition</h2>
+          </div>
+          <div class="lg:col-span-9">
+            <p class="prose-fv max-w-[38rem]">
+              Everything sent here is treated as confidential. We do not share briefs, and we do
+              not add you to anything you have not asked for.
+            </p>
+
+            <EnquiryForm
+              id="acquisition"
+              formName="private-acquisition"
+              submitLabel="Discuss an acquisition"
+              note="Briefs are read personally. We will reply with an honest view of what is realistic, usually within two working days."
+              fields={[
+                { name: 'name', label: 'Name', required: true, autocomplete: 'name' },
+                { name: 'email', label: 'Email', type: 'email', required: true, autocomplete: 'email' },
+                {
+                  name: 'interest',
+                  label: 'Area of interest',
+                  type: 'select',
+                  required: true,
+                  options: COLLECTOR_INTERESTS,
+                },
+                {
+                  name: 'budget',
+                  label: 'Approximate budget',
+                  type: 'select',
+                  options: BUDGET_RANGES,
+                },
+                {
+                  name: 'object',
+                  label: 'Object sought',
+                  type: 'textarea',
+                  required: true,
+                  rows: 4,
+                  placeholder: 'What you are looking for, and how specific the brief is.',
+                },
+                {
+                  name: 'notes',
+                  label: 'Notes',
+                  type: 'textarea',
+                  rows: 4,
+                  placeholder: 'Condition thresholds, documentary requirements, timing, anything else.',
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Page>

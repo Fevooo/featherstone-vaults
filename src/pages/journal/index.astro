@@ -1,0 +1,103 @@
+---
+import Page from '../../layouts/Page.astro';
+import { getJournal, formatDate } from '../../lib/catalogue';
+
+const articles = await getJournal();
+const published = articles.filter((a) => !a.data.inPreparation);
+const forthcoming = articles.filter((a) => a.data.inPreparation);
+---
+
+<Page
+  title="The Journal"
+  heading="The Journal."
+  eyebrow="Writing"
+  description="Writing on collecting, provenance, documentation and the fields Featherstone Vaults works in. Published as the research is completed."
+  path="/journal"
+  standfirst="Notes on collecting and on the fields we work in. Articles are published when the research behind them is finished, which is why there are not many of them."
+  trail={[{ label: 'Journal', href: '/journal' }]}
+>
+  <div class="shell">
+    {
+      published.length > 0 && (
+        <section aria-labelledby="published-heading">
+          <h2 id="published-heading" class="sr-only">
+            Published
+          </h2>
+          <ul>
+            {published.map((article) => (
+              <li class="rule-t">
+                <a href={`/journal/${article.id}`} class="group grid gap-x-12 gap-y-4 py-10 lg:grid-cols-12">
+                  <div class="flex items-baseline gap-4 lg:col-span-3 lg:flex-col lg:gap-2">
+                    <p class="label-sm text-bronze-lit">{article.data.subject}</p>
+                    {article.data.published && (
+                      <time
+                        class="label-sm tnum text-ash"
+                        datetime={article.data.published.toISOString().slice(0, 10)}
+                      >
+                        {formatDate(article.data.published)}
+                      </time>
+                    )}
+                  </div>
+                  <div class="lg:col-span-8">
+                    <h3 class="display-2 max-w-[24ch] text-parchment transition-colors group-hover:text-ivory">
+                      {article.data.title}
+                    </h3>
+                    <p class="prose-fv mt-5 max-w-[40rem]">{article.data.standfirst}</p>
+                    {article.data.readingTime && (
+                      <p class="label-sm mt-6 text-ash">{article.data.readingTime}</p>
+                    )}
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      forthcoming.length > 0 && (
+        <section class="pt-20 md:pt-28" aria-labelledby="forthcoming-heading">
+          <h2 id="forthcoming-heading" class="label-sm rule-t py-5 text-bronze-lit">
+            In preparation
+          </h2>
+          <p class="prose-fv mt-6 mb-10">
+            These subjects are being researched. They are listed so that collectors can say which
+            would be most useful, and because we would rather publish late than publish something
+            we cannot stand behind.
+          </p>
+          <ul class="grid gap-px bg-[var(--line-soft)] md:grid-cols-2">
+            {forthcoming.map((article) => (
+              <li class="bg-ink">
+                <a href={`/journal/${article.id}`} class="group flex h-full flex-col py-8 md:px-7">
+                  <p class="label-sm text-ash">{article.data.subject}</p>
+                  <h3 class="display-3 mt-4 max-w-[28ch] text-parchment transition-colors group-hover:text-ivory">
+                    {article.data.title}
+                  </h3>
+                  <p class="meta mt-3 max-w-[44ch] text-ash">{article.data.standfirst}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <div class="pt-24 pb-24 md:pt-32 md:pb-32">
+      <div class="rule-t pt-12">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <h2 class="display-2 max-w-[18ch] text-ivory lg:col-span-6">
+            Told first, before the catalogue.
+          </h2>
+          <div class="lg:col-span-6">
+            <p class="prose-fv">
+              Private Access carries advance notice of selected acquisitions and, occasionally, new
+              writing. It is infrequent and it is not a newsletter.
+            </p>
+            <a href="/private-access" class="action mt-9">Request private access</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Page>

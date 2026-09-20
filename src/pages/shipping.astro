@@ -1,0 +1,72 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+
+const sections = [
+  {
+    heading: 'Packing and handling',
+    body: [
+      'Objects are packed by specialist fine art handlers. Fragile, heavy and awkward material is crated rather than boxed, and mounts are packed separately from the objects they carry.',
+      'Nothing is shipped in a way that requires the recipient to improvise. Where an object needs to be unpacked in a particular order, written instructions go with it.',
+    ],
+  },
+  {
+    heading: 'Insurance',
+    body: [
+      'Everything is shipped fully insured for the purchase price, at our cost unless agreed otherwise, and remains at our risk until it is delivered and signed for.',
+      'Damage in transit is rare and is dealt with directly by us. Photograph the packaging before opening it if there is any visible damage on arrival, and tell us the same day.',
+    ],
+  },
+  {
+    heading: 'Delivery within the United Kingdom',
+    body: [
+      'Most objects are delivered within a week of cleared payment. Larger pieces are moved by a specialist carrier on a scheduled run and can take longer.',
+      'Collection in person by appointment is welcome, and for heavy or fragile objects it is often the better option.',
+    ],
+  },
+  {
+    heading: 'International shipping',
+    body: [
+      'We ship worldwide. Timing depends on the destination, the category of object and whether an export licence is needed.',
+      'We will quote for shipping before you commit, or work with a shipping agent of your choosing.',
+    ],
+  },
+  {
+    heading: 'Export licensing',
+    body: [
+      'Export from the United Kingdom may require a licence depending on an object’s age, value and category. Where a licence is required we identify it before sale and make the application ourselves.',
+      'A licence application can be deferred or refused. Where that risk exists it is disclosed before you commit, and the sale terms set out what happens in that event, including the return of funds.',
+    ],
+  },
+  {
+    heading: 'Import duties and taxes',
+    body: [
+      'Import duty, VAT and any local charges in the destination country are the buyer’s responsibility and are not included in the purchase price.',
+      'We declare objects accurately. We will not undervalue a declaration or describe an object as something it is not, and we cannot make an exception to this.',
+    ],
+  },
+  {
+    heading: 'Documentation',
+    body: [
+      'The object dossier travels with the object: the catalogue entry, condition report, photography and copies of supporting documents. Original documents are included where we hold them.',
+      'A commercial invoice, and where relevant the export licence and any CITES or analytical certification, accompany the shipment.',
+    ],
+  },
+  {
+    heading: 'Returns',
+    body: [
+      'If an object is materially not as described, tell us within fourteen days of delivery and return it in the condition it was sent. We refund the purchase price and the return shipping.',
+      'This is separate from, and does not limit, your statutory rights as a consumer where those apply.',
+    ],
+  },
+];
+---
+
+<LegalPage
+  title="Shipping"
+  heading="Shipping & Export."
+  eyebrow="Information"
+  description="How Featherstone Vaults packs, insures, ships and documents objects, including UK export licensing, import duties and returns."
+  path="/shipping"
+  standfirst="Moving a significant object is a specialist job and most of the risk sits in the packing. This is how we handle it."
+  sections={sections}
+/>

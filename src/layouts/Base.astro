@@ -1,0 +1,90 @@
+---
+import '../styles/global.css';
+import Seo, { type Props as SeoProps } from '../components/Seo.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { SITE } from '../consts';
+
+type Props = SeoProps & { bodyClass?: string };
+const { bodyClass = '', ...seo } = Astro.props;
+
+const organisation = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${SITE.url}/#organization`,
+  name: SITE.name,
+  url: SITE.url,
+  slogan: SITE.strapline,
+  description: SITE.description,
+  logo: `${SITE.url}/brand/lockup-ink.svg`,
+  image: `${SITE.url}/og/featherstone-vaults.png`,
+  email: SITE.email,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: SITE.locality,
+    addressRegion: SITE.region,
+    addressCountry: SITE.countryCode,
+  },
+  areaServed: 'Worldwide',
+  knowsAbout: [
+    'Antiquities',
+    'Natural history specimens',
+    'Meteorites',
+    'Rare books and manuscripts',
+    'Historic horology',
+    'Shipwreck and maritime artefacts',
+    'Spaceflight and exploration material',
+    'Numismatics',
+    'Militaria',
+    'Historic scientific instruments',
+  ],
+};
+
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE.url}/#website`,
+  url: SITE.url,
+  name: SITE.name,
+  publisher: { '@id': `${SITE.url}/#organization` },
+  inLanguage: 'en-GB',
+};
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0B0B0A" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap.xml" type="application/xml" />
+
+    <link
+      rel="preload"
+      href="/fonts/caslon-display-400-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preload" href="/fonts/jost-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <Seo {...seo} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(organisation)} is:inline />
+    <script type="application/ld+json" set:html={JSON.stringify(website)} is:inline />
+  </head>
+
+  <body class:list={['flex min-h-screen flex-col', bodyClass]}>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <SiteHeader />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

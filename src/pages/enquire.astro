@@ -1,0 +1,95 @@
+---
+import Page from '../layouts/Page.astro';
+import EnquiryForm from '../components/forms/EnquiryForm.astro';
+import { SITE, COLLECTOR_INTERESTS } from '../consts';
+---
+
+<Page
+  title="Enquire"
+  heading="Make an enquiry."
+  eyebrow="Contact"
+  description="Contact Featherstone Vaults about a specific object, a private search, a sale, or a question about provenance. Enquiries are answered personally."
+  path="/enquire"
+  standfirst="Every enquiry is read and answered by a person. If you are writing about a specific object, quote its catalogue number and we will reply with the dossier."
+  trail={[{ label: 'Enquire', href: '/enquire' }]}
+  headingWidth="14ch"
+>
+  <div class="shell pb-24 md:pb-32">
+    <div class="grid gap-x-16 gap-y-12 rule-t pt-12 lg:grid-cols-12">
+      <div class="lg:col-span-3">
+        <h2 class="label-sm text-bronze-lit">Direct</h2>
+        <p class="meta mt-5 text-parchment">
+          <a
+            href={`mailto:${SITE.email}`}
+            class="border-b border-[var(--line-bronze)] transition-colors hover:border-bronze-lit hover:text-ivory"
+          >
+            {SITE.email}
+          </a>
+        </p>
+        <p class="label-sm mt-8 text-ash">
+          {SITE.locality}<br />{SITE.country}
+        </p>
+
+        <h2 class="label-sm mt-12 text-bronze-lit">Also</h2>
+        <ul class="mt-5 space-y-2.5">
+          <li>
+            <a href="/private-acquisitions" class="meta text-parchment transition-colors hover:text-ivory">
+              Private acquisitions
+            </a>
+          </li>
+          <li>
+            <a href="/sell-an-object" class="meta text-parchment transition-colors hover:text-ivory">
+              Sell an object
+            </a>
+          </li>
+          <li>
+            <a href="/private-access" class="meta text-parchment transition-colors hover:text-ivory">
+              Private access
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="lg:col-span-9">
+        <EnquiryForm
+          id="enquiry"
+          formName="general-enquiry"
+          submitLabel="Send enquiry"
+          note="Enquiries are answered personally, usually within one working day."
+          fields={[
+            { name: 'name', label: 'Name', required: true, autocomplete: 'name' },
+            { name: 'email', label: 'Email', type: 'email', required: true, autocomplete: 'email' },
+            { name: 'object', label: 'Catalogue number', placeholder: 'e.g. FV-AN-0017' },
+            { name: 'interest', label: 'Subject', type: 'select', options: COLLECTOR_INTERESTS },
+            {
+              name: 'message',
+              label: 'Message',
+              type: 'textarea',
+              required: true,
+              rows: 6,
+            },
+          ]}
+        />
+      </div>
+    </div>
+  </div>
+</Page>
+
+<script>
+  /* Carry an object reference from an object page into the form. */
+  const params = new URLSearchParams(window.location.search);
+  const object = params.get('object');
+  const request = params.get('request');
+  if (object) {
+    const field = document.querySelector<HTMLInputElement>('#enquiry-object');
+    if (field) field.value = object;
+  }
+  if (request === 'dossier') {
+    const message = document.querySelector<HTMLTextAreaElement>('#enquiry-message');
+    if (message && !message.value) {
+      message.value = object
+        ? `Please send the object dossier for ${object}.`
+        : 'Please send the object dossier.';
+    }
+  }
+</script>
