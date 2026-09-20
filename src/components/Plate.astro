@@ -32,6 +32,7 @@ const {
 } = Astro.props;
 
 const isRemote = typeof image === 'string';
+const fetchPriority = loading === 'eager' ? 'high' : 'low';
 ---
 
 <div
@@ -46,6 +47,7 @@ const isRemote = typeof image === 'string';
           alt={alt}
           sizes={sizes}
           loading={loading}
+          fetchpriority={fetchPriority}
           decoding="async"
           referrerpolicy="no-referrer"
           class="h-full w-full object-cover"
@@ -56,6 +58,7 @@ const isRemote = typeof image === 'string';
           alt={alt}
           sizes={sizes}
           loading={loading}
+          fetchpriority={fetchPriority}
           widths={[480, 800, 1200, 1800]}
           class="h-full w-full object-cover"
         />
