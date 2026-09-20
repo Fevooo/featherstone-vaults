@@ -1,6 +1,7 @@
 ---
 import Plate from './Plate.astro';
 import type { DepartmentEntry } from '../lib/catalogue';
+import type { ImageMetadata } from 'astro';
 
 interface Props {
   department: DepartmentEntry;
@@ -11,7 +12,30 @@ interface Props {
 const { department, index, ratio = '2 / 3', sizes } = Astro.props;
 const { title, shortTitle, keywords, plateTone, image, remoteImage, imageAlt } = department.data;
 const number = String(index).padStart(2, '0');
-const plateImage = image ?? remoteImage;
+
+function cardSizedImage(source?: ImageMetadata | string) {
+  if (typeof source !== 'string') return source;
+
+  try {
+    const url = new URL(source);
+    const isCommonsResizeUrl =
+      url.hostname === 'commons.wikimedia.org' &&
+      (url.pathname.includes('/Special:FilePath/') || url.pathname.includes('/Special:Redirect/file/'));
+
+    // Collection cards are small: requesting 1,600px source files wastes bandwidth,
+    // especially on mobile. 800px still covers high-DPI desktop cards comfortably.
+    if (isCommonsResizeUrl && url.searchParams.has('width')) {
+      url.searchParams.set('width', '800');
+      return url.toString();
+    }
+  } catch {
+    // Leave any non-standard source untouched.
+  }
+
+  return source;
+}
+
+const plateImage = cardSizedImage(image ?? remoteImage);
 ---
 
 <article class="stretch-host group relative">
@@ -25,6 +49,7 @@ const plateImage = image ?? remoteImage;
     image={plateImage}
     alt={imageAlt ?? ''}
     sizes={sizes}
+    loading="lazy"
     class="bg-charcoal [&_img]:scale-[1.015] [&_img]:opacity-[0.84] [&_img]:brightness-[0.70] [&_img]:contrast-[1.12] [&_img]:saturate-[0.62] [&_img]:grayscale-[0.18] [&_img]:transition-all [&_img]:duration-700 group-hover:[&_img]:scale-[1.03] group-hover:[&_img]:opacity-[0.93] group-hover:[&_img]:brightness-[0.80] group-hover:[&_img]:saturate-[0.80]"
   />
 
