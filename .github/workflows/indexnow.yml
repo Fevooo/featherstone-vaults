@@ -3,7 +3,7 @@ name: IndexNow
 on:
   push:
     branches:
-      - claude/gallant-gates-eopp5s
+      - main
   workflow_dispatch:
 
 permissions:
@@ -17,61 +17,73 @@ jobs:
         env:
           INDEXNOW_KEY: 8a166efa4e6e33f2018da93bd27c1973
           SITE_ORIGIN: https://featherstonevaults.com
+          EXPECTED_COMMIT: ${{ github.sha }}
         run: |
           node <<'NODE'
-          const key = process.env.INDEXNOW_KEY;
-          const origin = process.env.SITE_ORIGIN;
-          const keyUrl = `${origin}/${key}.txt`;
-          const sitemapUrl = `${origin}/sitemap.xml`;
+          const key = process.env.INDEXNOW_KEY
+          const origin = process.env.SITE_ORIGIN
+          const expectedCommit = process.env.EXPECTED_COMMIT
+          const keyUrl = `${origin}/${key}.txt`
+          const markerUrl = `${origin}/build.txt`
+          const sitemapUrl = `${origin}/sitemap.xml`
 
-          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
           async function waitForDeploy() {
             for (let attempt = 1; attempt <= 24; attempt += 1) {
               try {
-                const response = await fetch(keyUrl, { cache: 'no-store' });
-                if (response.ok && (await response.text()).trim() === key) return;
+                const markerResponse = await fetch(markerUrl, { cache: 'no-store' })
+                if (markerResponse.ok) {
+                  const deployedCommit = (await markerResponse.text()).trim()
+                  if (deployedCommit === expectedCommit) return
+                }
               } catch {}
 
-              console.log(`Production deploy not ready yet (${attempt}/24).`);
-              await sleep(15000);
+              console.log(`Production commit not ready yet (${attempt}/24)`)
+              await sleep(15000)
             }
 
-            throw new Error('IndexNow key did not become available on the production site.');
+            throw new Error('Production did not reach the expected commit')
           }
 
           async function main() {
-            await waitForDeploy();
+            await waitForDeploy()
 
-            const sitemapResponse = await fetch(sitemapUrl, { cache: 'no-store' });
-            if (!sitemapResponse.ok) {
-              throw new Error(`Could not fetch sitemap: ${sitemapResponse.status}`);
+            const keyResponse = await fetch(keyUrl, { cache: 'no-store' })
+            if (!keyResponse.ok || (await keyResponse.text()).trim() !== key) {
+              throw new Error('IndexNow key file is not available on production')
             }
 
-            const sitemap = await sitemapResponse.text();
-            const urlList = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-            if (urlList.length === 0) throw new Error('Sitemap contained no URLs.');
+            const sitemapResponse = await fetch(sitemapUrl, { cache: 'no-store' })
+            if (!sitemapResponse.ok) {
+              throw new Error(`Could not fetch sitemap: ${sitemapResponse.status}`)
+            }
+
+            const sitemap = await sitemapResponse.text()
+            const urlList = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+            if (urlList.length === 0) throw new Error('Sitemap contained no URLs')
 
             const response = await fetch('https://api.indexnow.org/indexnow', {
               method: 'POST',
-              headers: { 'content-type': 'application/json; charset=utf-8' },
+              headers: { 'content-type': 'application/json' },
               body: JSON.stringify({
                 host: 'featherstonevaults.com',
                 key,
                 keyLocation: keyUrl,
                 urlList,
               }),
-            });
+            })
 
             if (!response.ok) {
-              throw new Error(`IndexNow returned ${response.status}: ${await response.text()}`);
+              throw new Error(`IndexNow returned ${response.status}: ${await response.text()}`)
             }
 
-            console.log(`Submitted ${urlList.length} sitemap URLs to IndexNow.`);
+            console.log(`Verified production commit ${expectedCommit}`)
+            console.log(`Submitted ${urlList.length} sitemap URLs to IndexNow`)
           }
 
           main().catch((error) => {
-            console.error(error);
-            process.exit(1);
-          });
+            console.error(error)
+            process.exit(1)
+          })
           NODE

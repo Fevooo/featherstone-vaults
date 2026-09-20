@@ -1,19 +1,41 @@
 ---
-import Page from '../../layouts/Page.astro';
-import { getJournal, formatDate } from '../../lib/catalogue';
+import Page from '../../layouts/Page.astro'
+import Plate from '../../components/Plate.astro'
+import { SITE } from '../../consts'
+import { getJournal, formatDate } from '../../lib/catalogue'
 
-const articles = await getJournal();
-const published = articles.filter((a) => !a.data.inPreparation);
-const forthcoming = articles.filter((a) => a.data.inPreparation);
+const articles = await getJournal()
+const published = articles.filter((a) => !a.data.inPreparation)
+const forthcoming = articles.filter((a) => a.data.inPreparation)
+
+const itemListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${SITE.url}/journal#collection`,
+  name: 'The Journal',
+  description:
+    'Research notes on provenance, ownership history, authenticity, condition and collecting across the fields handled by Featherstone Vaults.',
+  url: `${SITE.url}/journal`,
+  isPartOf: { '@id': `${SITE.url}/#website` },
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: published.map((article, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `${SITE.url}/journal/${article.id}`,
+      name: article.data.title,
+    })),
+  },
+}
 ---
 
 <Page
   title="The Journal"
   heading="The Journal."
   eyebrow="Writing"
-  description="Writing on collecting, provenance, documentation and the fields Featherstone Vaults works in. Published as the research is completed."
+  description="Research on provenance, authenticity, ownership history, condition and collecting across antiquities, natural history, military watches, spaceflight and maritime material."
   path="/journal"
-  standfirst="Notes on collecting and on the fields we work in. Articles are published when the research behind them is finished, which is why there are not many of them."
+  standfirst="Research notes on the objects we handle and the evidence around them. Sources are shown with each article so that the underlying record can be checked."
   trail={[{ label: 'Journal', href: '/journal' }]}
 >
   <div class="shell">
@@ -24,32 +46,51 @@ const forthcoming = articles.filter((a) => a.data.inPreparation);
             Published
           </h2>
           <ul>
-            {published.map((article) => (
-              <li class="rule-t">
-                <a href={`/journal/${article.id}`} class="group grid gap-x-12 gap-y-4 py-10 lg:grid-cols-12">
-                  <div class="flex items-baseline gap-4 lg:col-span-3 lg:flex-col lg:gap-2">
-                    <p class="label-sm text-bronze-lit">{article.data.subject}</p>
-                    {article.data.published && (
-                      <time
-                        class="label-sm tnum text-ash"
-                        datetime={article.data.published.toISOString().slice(0, 10)}
-                      >
-                        {formatDate(article.data.published)}
-                      </time>
+            {published.map((article) => {
+              const image = article.data.image ?? article.data.remoteImage
+
+              return (
+                <li class="rule-t">
+                  <a
+                    href={`/journal/${article.id}`}
+                    class="group grid gap-x-12 gap-y-7 py-10 lg:grid-cols-12 lg:items-start"
+                  >
+                    <div class="flex items-baseline gap-4 lg:col-span-3 lg:flex-col lg:gap-2">
+                      <p class="label-sm text-bronze-lit">{article.data.subject}</p>
+                      {article.data.published && (
+                        <time
+                          class="label-sm tnum text-ash"
+                          datetime={article.data.published.toISOString().slice(0, 10)}
+                        >
+                          {formatDate(article.data.published)}
+                        </time>
+                      )}
+                    </div>
+
+                    <div class="lg:col-span-6">
+                      <h3 class="display-2 max-w-[24ch] text-parchment transition-colors group-hover:text-ivory">
+                        {article.data.title}
+                      </h3>
+                      <p class="prose-fv mt-5 max-w-[40rem]">{article.data.standfirst}</p>
+                      {article.data.readingTime && (
+                        <p class="label-sm mt-6 text-ash">{article.data.readingTime}</p>
+                      )}
+                    </div>
+
+                    {image && (
+                      <div class="lg:col-span-3">
+                        <Plate
+                          ratio="4 / 3"
+                          image={image}
+                          alt={article.data.imageAlt ?? ''}
+                          sizes="(min-width: 1024px) 320px, 100vw"
+                        />
+                      </div>
                     )}
-                  </div>
-                  <div class="lg:col-span-8">
-                    <h3 class="display-2 max-w-[24ch] text-parchment transition-colors group-hover:text-ivory">
-                      {article.data.title}
-                    </h3>
-                    <p class="prose-fv mt-5 max-w-[40rem]">{article.data.standfirst}</p>
-                    {article.data.readingTime && (
-                      <p class="label-sm mt-6 text-ash">{article.data.readingTime}</p>
-                    )}
-                  </div>
-                </a>
-              </li>
-            ))}
+                  </a>
+                </li>
+              )
+            })}
           </ul>
         </section>
       )
@@ -62,9 +103,8 @@ const forthcoming = articles.filter((a) => a.data.inPreparation);
             In preparation
           </h2>
           <p class="prose-fv mt-6 mb-10">
-            These subjects are being researched. They are listed so that collectors can say which
-            would be most useful, and because we would rather publish late than publish something
-            we cannot stand behind.
+            These subjects are still being researched. They will move into the Journal when the
+            supporting record is complete.
           </p>
           <ul class="grid gap-px bg-[var(--line-soft)] md:grid-cols-2">
             {forthcoming.map((article) => (
@@ -100,4 +140,6 @@ const forthcoming = articles.filter((a) => a.data.inPreparation);
       </div>
     </div>
   </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)} is:inline />
 </Page>
