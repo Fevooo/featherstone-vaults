@@ -2,8 +2,9 @@
 
 The production website for [featherstonevaults.com](https://featherstonevaults.com).
 
-Astro 7, TypeScript and Tailwind CSS 4. Statically generated, no client framework,
-deployed on Cloudflare Pages.
+Astro 7, TypeScript and Tailwind CSS 4. Statically generated, no client framework.
+
+> Deployment note: production hosting is currently handled outside this repository. Keep the active hosting provider pointed at the branch that contains the latest site changes.
 
 ```bash
 npm install
@@ -22,14 +23,12 @@ interface so that nothing on the live site misleads a visitor.
 
 ### 1. Photography
 
-**No object photography is used anywhere on the site.** Every image position
-renders a `Plate`: a flat tonal field inside a hairline mount. No stock imagery,
-no generated imagery and no pictures of objects the house does not hold.
+**No sale-object photography is used anywhere on the site unless a real object image is supplied.** Department pages may use clearly credited open-access museum or public-domain imagery as representative editorial photography. Sale-object plates remain blank until Featherstone Vaults has photography of the actual object.
 
 Every image position is already wired. Drop a file in the right place, name it
-in the front matter, and the blank mount is replaced. Everything runs through
+in the front matter, and the blank mount is replaced. Everything local runs through
 `astro:assets`, so responsive `srcset`, modern formats, intrinsic dimensions and
-lazy loading are handled for you. Nothing else needs changing.
+lazy loading are handled for you.
 
 **An object** — file beside the markdown in `src/content/objects/`:
 
@@ -45,15 +44,24 @@ images:
 The first image fills the main plate and becomes the page's social card; the
 next three appear as detail thumbnails beneath it.
 
-**A department** — file beside the markdown in `src/content/collections/`:
+**A department** — either a local image or a stable open-access museum/public-domain URL:
 
 ```yaml
 image: ./natural-history.jpg
 imageAlt: A prepared Jurassic ammonite lit from the left
 ```
 
-One file drives three positions: the homepage strip, the `/collections` grid and
-the banner at the top of the department page.
+or
+
+```yaml
+remoteImage: https://example.org/open-access-image.jpg
+imageAlt: A prepared Jurassic ammonite
+imageCredit: Museum or photographer · Public Domain / CC0
+imageSourceUrl: https://example.org/object-record
+```
+
+One department image drives the homepage strip, the `/collections` grid and
+the department page.
 
 **A journal article** — file beside the markdown in `src/content/journal/`:
 
@@ -69,9 +77,8 @@ Photography still required:
 
 | Where | What | Count | Format |
 | --- | --- | --- | --- |
-| Departments | One strong object photograph each | 10 | portrait, 2:3, 1200px wide or larger |
 | Objects | Primary shot plus two or three details | per object | portrait, 4:5 |
-| Department banners | Optional wide shot | up to 10 | landscape, 21:9, 2000px wide |
+| Department banners | Optional dedicated wide shot | up to 10 | landscape, 21:9, 2000px wide |
 | `/about` | The premises or the Cotswolds setting | 1 | landscape, 4:3, 1600px wide |
 | Journal | Optional lead image per article | per article | landscape, 16:9 |
 | `public/og/featherstone-vaults.png` | Regenerate the brand social card if you want a photograph on it | 1 | 1200x630 |
@@ -110,10 +117,10 @@ public/
   brand/          logo artwork (see "Brand assets" below)
   fonts/          self-hosted woff2, latin subset
   og/             social card
-  _headers        Cloudflare cache and security headers
+  _headers        hosting cache and security headers
   robots.txt
 functions/
-  api/enquiry.ts  Cloudflare Pages Function: form handler
+  api/enquiry.ts  serverless form handler
 src/
   components/     Plate, ObjectTile, CollectionPanel, SectionHead, forms, SEO
   content/
@@ -192,11 +199,11 @@ button colours. It is used once on the homepage, deliberately.
 
 ## Forms
 
-Four forms post to `/api/enquiry`, handled by the Pages Function in
+Four forms post to `/api/enquiry`, handled by the serverless function in
 `functions/api/enquiry.ts`. They work without JavaScript (native form POST) and
 are progressively enhanced to submit in place.
 
-Set these in the Cloudflare dashboard to make them deliver:
+Set these with the active hosting provider to make them deliver:
 
 | Variable | Value |
 | --- | --- |
@@ -212,7 +219,7 @@ field and a length cap; no data is stored anywhere.
 
 ## Deployment
 
-Cloudflare Pages, building from this repository.
+Build settings:
 
 | Setting | Value |
 | --- | --- |
@@ -222,11 +229,9 @@ Cloudflare Pages, building from this repository.
 | Node version | 22 |
 
 `public/_headers` sets immutable caching for fonts and hashed assets plus the
-usual security headers. `functions/` is picked up automatically as Pages
-Functions.
+usual security headers.
 
-URLs have no trailing slash (`build.format: 'file'`), which Pages resolves
-natively.
+URLs have no trailing slash (`build.format: 'file'`).
 
 ---
 
