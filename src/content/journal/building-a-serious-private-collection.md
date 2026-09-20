@@ -6,7 +6,6 @@ published: 2026-06-02
 updated: 2026-09-20
 readingTime: 7 min
 order: 1
-collection: antiquities
 keywords:
   - private collecting
   - provenance
@@ -45,7 +44,7 @@ Condition can sometimes be stabilised. A mount can be replaced. An attribution c
 
 For antiquities, that means retaining old invoices, auction catalogue references, collection labels, export documents and correspondence. For meteorites it includes the recognised meteorite name, classification, mass history and a credible link to the classified material. For fossils it includes locality and geological information where known, plus an honest record of restoration and composite work. For historic watches it includes movement and case photography, service records and any evidence of military issue or earlier ownership.
 
-This is why our [provenance work](/provenance) sits alongside the catalogue rather than behind it.
+This is why our [provenance work](/provenance-authenticity) sits alongside the catalogue rather than behind it.
 
 ## Buy fewer objects than the budget allows
 
