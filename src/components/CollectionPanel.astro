@@ -9,8 +9,9 @@ interface Props {
   sizes?: string;
 }
 const { department, index, ratio = '2 / 3', sizes } = Astro.props;
-const { title, shortTitle, keywords, plateTone, image, imageAlt } = department.data;
+const { title, shortTitle, keywords, plateTone, image, remoteImage, imageAlt } = department.data;
 const number = String(index).padStart(2, '0');
+const plateImage = image ?? remoteImage;
 ---
 
 <article class="stretch-host group relative">
@@ -21,7 +22,7 @@ const number = String(index).padStart(2, '0');
   <Plate
     ratio={ratio}
     tone={plateTone}
-    image={image}
+    image={plateImage}
     alt={imageAlt ?? ''}
     sizes={sizes}
     class="transition-[filter] duration-500 group-hover:brightness-[1.4]"
