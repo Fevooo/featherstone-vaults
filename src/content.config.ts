@@ -10,23 +10,33 @@ const AVAILABILITY = ['AVAILABLE', 'RESERVED', 'SOLD', 'PRIVATE'] as const;
  */
 const collectionsCollection = defineCollection({
   loader: glob({ base: './src/content/collections', pattern: '**/*.md' }),
-  schema: z.object({
-    title: z.string(),
-    /** Short form used where the full title will not fit. */
-    shortTitle: z.string().optional(),
-    /** 'primary' collections appear in the homepage strip. */
-    tier: z.enum(['primary', 'secondary']),
-    order: z.number(),
-    /** One line describing what the department covers. */
-    scope: z.string(),
-    /** Two or three keywords shown beneath the title in the strip. */
-    keywords: z.array(z.string()).min(2).max(4),
-    /** Longer introduction shown at the head of the collection page. */
-    intro: z.string(),
-    plateTone: z.enum(['1', '2', '3', '4']).default('1'),
-    seoTitle: z.string().optional(),
-    seoDescription: z.string(),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      /** Short form used where the full title will not fit. */
+      shortTitle: z.string().optional(),
+      /** 'primary' collections appear in the homepage strip. */
+      tier: z.enum(['primary', 'secondary']),
+      order: z.number(),
+      /** One line describing what the department covers. */
+      scope: z.string(),
+      /** Two or three keywords shown beneath the title in the strip. */
+      keywords: z.array(z.string()).min(2).max(4),
+      /** Longer introduction shown at the head of the collection page. */
+      intro: z.string(),
+      plateTone: z.enum(['1', '2', '3', '4']).default('1'),
+
+      /**
+       * The department photograph. Drop a file beside this markdown file and
+       * reference it here; it replaces the blank mount in the homepage strip,
+       * on /collections, and as the banner on the department page.
+       */
+      image: image().optional(),
+      imageAlt: z.string().optional(),
+
+      seoTitle: z.string().optional(),
+      seoDescription: z.string(),
+    }),
 });
 
 /**
@@ -103,20 +113,26 @@ const objectsCollection = defineCollection({
  */
 const journalCollection = defineCollection({
   loader: glob({ base: './src/content/journal', pattern: '**/*.md' }),
-  schema: z.object({
-    title: z.string(),
-    /** Sentence describing what the article covers. */
-    standfirst: z.string(),
-    subject: z.string(),
-    published: z.coerce.date().optional(),
-    updated: z.coerce.date().optional(),
-    readingTime: z.string().optional(),
-    /** True while the article is still being researched and written. */
-    inPreparation: z.boolean().default(false),
-    order: z.number().default(100),
-    seoTitle: z.string().optional(),
-    seoDescription: z.string(),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      /** Sentence describing what the article covers. */
+      standfirst: z.string(),
+      subject: z.string(),
+      published: z.coerce.date().optional(),
+      updated: z.coerce.date().optional(),
+      readingTime: z.string().optional(),
+      /** True while the article is still being researched and written. */
+      inPreparation: z.boolean().default(false),
+      order: z.number().default(100),
+
+      /** Lead image. Shown above the article when supplied. */
+      image: image().optional(),
+      imageAlt: z.string().optional(),
+
+      seoTitle: z.string().optional(),
+      seoDescription: z.string(),
+    }),
 });
 
 export const collections = {

@@ -26,31 +26,58 @@ interface so that nothing on the live site misleads a visitor.
 renders a `Plate`: a flat tonal field inside a hairline mount. No stock imagery,
 no generated imagery and no pictures of objects the house does not hold.
 
-To replace a plate with a real photograph, add the file under
-`src/content/objects/` (or any path Astro can resolve) and reference it from the
-object's front matter:
+Every image position is already wired. Drop a file in the right place, name it
+in the front matter, and the blank mount is replaced. Everything runs through
+`astro:assets`, so responsive `srcset`, modern formats, intrinsic dimensions and
+lazy loading are handled for you. Nothing else needs changing.
+
+**An object** — file beside the markdown in `src/content/objects/`:
 
 ```yaml
 images:
   - src: ./roman-marble-portrait-head-01.jpg
     alt: Roman marble portrait head, three-quarter view against a grey ground
     caption: Front view
+  - src: ./roman-marble-portrait-head-02.jpg
+    alt: The same head in profile
 ```
 
-The schema runs images through `astro:assets`, so responsive `srcset`, modern
-formats, dimensions and lazy loading are handled automatically.
+The first image fills the main plate and becomes the page's social card; the
+next three appear as detail thumbnails beneath it.
+
+**A department** — file beside the markdown in `src/content/collections/`:
+
+```yaml
+image: ./natural-history.jpg
+imageAlt: A prepared Jurassic ammonite lit from the left
+```
+
+One file drives three positions: the homepage strip, the `/collections` grid and
+the banner at the top of the department page.
+
+**A journal article** — file beside the markdown in `src/content/journal/`:
+
+```yaml
+image: ./dirty-dozen.jpg
+imageAlt: Twelve military wristwatches laid out in a grid
+```
+
+**The premises shot on `/about`** — `src/assets/cotswolds.jpg`. Picked up by
+name; see `src/assets/README.md`.
 
 Photography still required:
 
-| Where | What | Count |
-| --- | --- | --- |
-| `/` collection strip and `/collections` | One strong object photograph per department, portrait format | 10 |
-| `/objects/*` | Primary plate plus two or three detail views per object | per object |
-| `/about` | The premises or the Cotswolds setting, landscape format | 1 |
-| `public/og/featherstone-vaults.png` | Regenerate the social card once the hero photograph exists | 1 |
+| Where | What | Count | Format |
+| --- | --- | --- | --- |
+| Departments | One strong object photograph each | 10 | portrait, 2:3, 1200px wide or larger |
+| Objects | Primary shot plus two or three details | per object | portrait, 4:5 |
+| Department banners | Optional wide shot | up to 10 | landscape, 21:9, 2000px wide |
+| `/about` | The premises or the Cotswolds setting | 1 | landscape, 4:3, 1600px wide |
+| Journal | Optional lead image per article | per article | landscape, 16:9 |
+| `public/og/featherstone-vaults.png` | Regenerate the brand social card if you want a photograph on it | 1 | 1200x630 |
 
 Remove the standing note in `src/pages/objects/index.astro` and
-`src/pages/collections/[slug].astro` once photography is complete.
+`src/pages/collections/[slug].astro` once object photography is complete.
 
 ### 2. Catalogue entries
 

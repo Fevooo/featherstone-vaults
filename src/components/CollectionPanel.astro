@@ -9,7 +9,7 @@ interface Props {
   sizes?: string;
 }
 const { department, index, ratio = '2 / 3', sizes } = Astro.props;
-const { title, shortTitle, keywords, plateTone } = department.data;
+const { title, shortTitle, keywords, plateTone, image, imageAlt } = department.data;
 const number = String(index).padStart(2, '0');
 ---
 
@@ -21,6 +21,8 @@ const number = String(index).padStart(2, '0');
   <Plate
     ratio={ratio}
     tone={plateTone}
+    image={image}
+    alt={imageAlt ?? ''}
     sizes={sizes}
     class="transition-[filter] duration-500 group-hover:brightness-[1.4]"
   />

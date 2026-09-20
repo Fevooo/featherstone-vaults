@@ -3,8 +3,10 @@ import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Plate from '../../components/Plate.astro';
 import { SITE } from '../../consts';
 import { getJournal, formatDate, type JournalEntry } from '../../lib/catalogue';
+import { ogImageFrom } from '../../lib/site-images';
 
 export const getStaticPaths = (async () => {
   const articles = await getJournal();
@@ -26,6 +28,7 @@ const { article, next } = Astro.props;
 const d = article.data;
 const path = `/journal/${article.id}`;
 const { Content } = await render(article);
+const ogImage = await ogImageFrom(d.image);
 
 const articleJsonLd = d.inPreparation
   ? null
@@ -50,6 +53,7 @@ const articleJsonLd = d.inPreparation
   description={d.seoDescription}
   path={path}
   ogType="article"
+  ogImage={ogImage}
   noindex={d.inPreparation}
   publishedTime={d.published}
   modifiedTime={d.updated ?? d.published}
@@ -68,6 +72,18 @@ const articleJsonLd = d.inPreparation
         <p class="label-sm text-bronze-lit">{d.subject}</p>
         <h1 class="display-1 mt-7 max-w-[20ch] text-ivory">{d.title}</h1>
         <p class="prose-fv mt-8 max-w-[38rem] text-parchment md:mt-10">{d.standfirst}</p>
+        {
+          d.image && (
+            <Plate
+              ratio="16 / 9"
+              image={d.image}
+              alt={d.imageAlt ?? ''}
+              loading="eager"
+              sizes="(min-width: 1536px) 1440px, 100vw"
+              class="mt-12 md:mt-14"
+            />
+          )
+        }
       </header>
 
       {

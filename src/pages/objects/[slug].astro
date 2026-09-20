@@ -5,6 +5,7 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Plate from '../../components/Plate.astro';
 import ObjectTile from '../../components/ObjectTile.astro';
 import { SITE, SPECIMEN_NOTICE } from '../../consts';
+import { ogImageFrom } from '../../lib/site-images';
 import {
   getAllObjects,
   getDepartments,
@@ -149,6 +150,7 @@ const productJsonLd = d.specimen
     };
 
 const enquirySubject = `${d.catalogueNumber}, ${d.title}`;
+const ogImage = await ogImageFrom(d.images[0]?.src);
 ---
 
 <Base
@@ -159,6 +161,7 @@ const enquirySubject = `${d.catalogueNumber}, ${d.title}`;
   }
   path={path}
   ogType="product"
+  ogImage={ogImage}
   noindex={d.specimen}
 >
   <div class="shell">

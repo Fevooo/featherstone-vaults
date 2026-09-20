@@ -10,15 +10,23 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     <div class="flex h-[4.5rem] items-center justify-between gap-6 lg:h-[5.25rem]">
       <a
         href="/"
-        class="shrink-0 transition-opacity hover:opacity-80"
+        class="flex shrink-0 items-center gap-3 transition-opacity hover:opacity-80 sm:gap-3.5"
         aria-label={`${SITE.name}, home`}
       >
+        <img
+          src="/brand/icon-ivory.svg"
+          alt=""
+          width="23"
+          height="25"
+          class="w-[1.3rem] sm:w-[1.4rem] lg:w-[1.5rem]"
+          fetchpriority="high"
+        />
         <img
           src="/brand/wordmark-ivory.svg"
           alt={SITE.name}
           width="198"
           height="11"
-          class="w-[9.25rem] sm:w-[11rem] lg:w-[12.375rem]"
+          class="w-[8.5rem] sm:w-[10.25rem] lg:w-[11.5rem]"
           fetchpriority="high"
         />
       </a>
@@ -77,13 +85,22 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
 >
   <div class="shell">
     <div class="flex h-[4.5rem] items-center justify-between rule-b">
-      <img
-        src="/brand/wordmark-ivory.svg"
-        alt={SITE.name}
-        width="148"
-        height="8"
-        class="w-[9.25rem] sm:w-[11rem]"
-      />
+      <span class="flex items-center gap-3">
+        <img
+          src="/brand/icon-ivory.svg"
+          alt=""
+          width="23"
+          height="25"
+          class="w-[1.3rem] sm:w-[1.4rem]"
+        />
+        <img
+          src="/brand/wordmark-ivory.svg"
+          alt={SITE.name}
+          width="148"
+          height="8"
+          class="w-[8.5rem] sm:w-[10.25rem]"
+        />
+      </span>
       <button type="button" class="label-sm -mr-1 py-2 pl-3 text-parchment" data-menu-close>
         Close
       </button>

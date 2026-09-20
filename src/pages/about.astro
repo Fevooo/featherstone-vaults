@@ -2,6 +2,7 @@
 import Page from '../layouts/Page.astro';
 import Plate from '../components/Plate.astro';
 import { SITE } from '../consts';
+import { siteImage } from '../lib/site-images';
 
 const principles = [
   {
@@ -26,6 +27,8 @@ const principles = [
     ],
   },
 ];
+
+const premises = siteImage('cotswolds');
 
 const roles = [
   {
@@ -161,8 +164,14 @@ const roles = [
           </p>
         </div>
         <div class="lg:col-span-6">
-          <Plate ratio="4 / 3" tone="3" sizes="(min-width: 1024px) 46vw, 100vw" />
-          <p class="meta mt-4 text-ash">Photography of the premises to follow.</p>
+          <Plate
+            ratio="4 / 3"
+            tone="3"
+            image={premises}
+            alt={premises ? 'The Featherstone Vaults premises in the Cotswolds' : ''}
+            sizes="(min-width: 1024px) 46vw, 100vw"
+          />
+          {!premises && <p class="meta mt-4 text-ash">Photography of the premises to follow.</p>}
         </div>
       </div>
     </section>

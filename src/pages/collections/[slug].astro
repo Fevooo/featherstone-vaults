@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from 'astro';
 import Page from '../../layouts/Page.astro';
 import ObjectTile from '../../components/ObjectTile.astro';
+import Plate from '../../components/Plate.astro';
 import {
   getDepartments,
   getObjectsInDepartment,
@@ -35,7 +36,8 @@ interface Props {
 }
 
 const { department, current, archived, siblings } = Astro.props;
-const { title, intro, scope, seoTitle, seoDescription, keywords } = department.data;
+const { title, intro, scope, seoTitle, seoDescription, keywords, image, imageAlt } =
+  department.data;
 const path = `/collections/${department.id}`;
 ---
 
@@ -52,6 +54,19 @@ const path = `/collections/${department.id}`;
   ]}
 >
   <div class="shell">
+    {
+      image && (
+        <Plate
+          ratio="21 / 9"
+          image={image}
+          alt={imageAlt ?? ''}
+          loading="eager"
+          sizes="(min-width: 1536px) 1440px, 100vw"
+          class="mb-16 md:mb-20"
+        />
+      )
+    }
+
     <div class="grid gap-x-16 gap-y-10 rule-t pt-10 lg:grid-cols-12">
       <h2 class="label-sm text-bronze-lit lg:col-span-3">How we catalogue it</h2>
       <div class="lg:col-span-8 lg:col-start-4">
