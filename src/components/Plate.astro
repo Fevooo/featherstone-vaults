@@ -5,6 +5,11 @@
  * Sale-object plates remain blank until Featherstone Vaults has real object
  * photography. Department plates may also use explicitly credited open-access
  * museum imagery to give the site visual context without implying ownership.
+ *
+ * Remote department imagery is routed through Netlify Image CDN. This removes
+ * third-party connection/redirect latency for visitors, resizes to the actual
+ * rendered plate, negotiates a modern image format and caches the result at the
+ * edge.
  */
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
@@ -34,38 +39,29 @@ const {
 const isRemote = typeof image === 'string';
 const fetchPriority = loading === 'eager' ? 'high' : 'low';
 
-function commonsSrcSet(source?: string) {
-  if (!source) return undefined;
-
-  try {
-    const url = new URL(source);
-    const canResize =
-      url.hostname === 'commons.wikimedia.org' &&
-      url.searchParams.has('width') &&
-      (url.pathname.includes('/Special:FilePath/') || url.pathname.includes('/Special:Redirect/file/'));
-
-    if (!canResize) return undefined;
-
-    const requestedMax = Number(url.searchParams.get('width')) || 1600;
-    const widths = [320, 480, 640, 800, 1200, 1600]
-      .filter((width) => width <= requestedMax)
-      .concat(requestedMax)
-      .filter((width, index, values) => values.indexOf(width) === index)
-      .sort((a, b) => a - b);
-
-    return widths
-      .map((width) => {
-        const candidate = new URL(url);
-        candidate.searchParams.set('width', String(width));
-        return `${candidate.toString()} ${width}w`;
-      })
-      .join(', ');
-  } catch {
-    return undefined;
-  }
+function ratioHeight(width: number) {
+  const [rw, rh] = ratio.split('/').map((part) => Number(part.trim()));
+  if (!Number.isFinite(rw) || !Number.isFinite(rh) || rw <= 0 || rh <= 0) return undefined;
+  return Math.round((width * rh) / rw);
 }
 
-const remoteSrcSet = isRemote ? commonsSrcSet(image) : undefined;
+function netlifyImage(source: string, width: number) {
+  const params = new URLSearchParams({
+    url: source,
+    w: String(width),
+    q: '76',
+    fit: 'cover',
+  });
+  const height = ratioHeight(width);
+  if (height) params.set('h', String(height));
+  return `/.netlify/images?${params.toString()}`;
+}
+
+const remoteWidths = [320, 480, 640, 800, 1200, 1600];
+const remoteSrc = isRemote ? netlifyImage(image, 800) : undefined;
+const remoteSrcSet = isRemote
+  ? remoteWidths.map((width) => `${netlifyImage(image, width)} ${width}w`).join(', ')
+  : undefined;
 ---
 
 <div
@@ -76,14 +72,13 @@ const remoteSrcSet = isRemote ? commonsSrcSet(image) : undefined;
     image ? (
       isRemote ? (
         <img
-          src={image}
+          src={remoteSrc}
           srcset={remoteSrcSet}
           alt={alt}
           sizes={sizes}
           loading={loading}
           fetchpriority={fetchPriority}
           decoding="async"
-          referrerpolicy="no-referrer"
           class="h-full w-full object-cover"
         />
       ) : (
@@ -93,7 +88,8 @@ const remoteSrcSet = isRemote ? commonsSrcSet(image) : undefined;
           sizes={sizes}
           loading={loading}
           fetchpriority={fetchPriority}
-          widths={[480, 800, 1200, 1800]}
+          widths={[320, 480, 640, 800, 1200, 1600]}
+          quality={76}
           class="h-full w-full object-cover"
         />
       )
