@@ -33,6 +33,39 @@ const {
 
 const isRemote = typeof image === 'string';
 const fetchPriority = loading === 'eager' ? 'high' : 'low';
+
+function commonsSrcSet(source?: string) {
+  if (!source) return undefined;
+
+  try {
+    const url = new URL(source);
+    const canResize =
+      url.hostname === 'commons.wikimedia.org' &&
+      url.searchParams.has('width') &&
+      (url.pathname.includes('/Special:FilePath/') || url.pathname.includes('/Special:Redirect/file/'));
+
+    if (!canResize) return undefined;
+
+    const requestedMax = Number(url.searchParams.get('width')) || 1600;
+    const widths = [320, 480, 640, 800, 1200, 1600]
+      .filter((width) => width <= requestedMax)
+      .concat(requestedMax)
+      .filter((width, index, values) => values.indexOf(width) === index)
+      .sort((a, b) => a - b);
+
+    return widths
+      .map((width) => {
+        const candidate = new URL(url);
+        candidate.searchParams.set('width', String(width));
+        return `${candidate.toString()} ${width}w`;
+      })
+      .join(', ');
+  } catch {
+    return undefined;
+  }
+}
+
+const remoteSrcSet = isRemote ? commonsSrcSet(image) : undefined;
 ---
 
 <div
@@ -44,6 +77,7 @@ const fetchPriority = loading === 'eager' ? 'high' : 'low';
       isRemote ? (
         <img
           src={image}
+          srcset={remoteSrcSet}
           alt={alt}
           sizes={sizes}
           loading={loading}
