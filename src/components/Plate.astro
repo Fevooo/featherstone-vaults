@@ -2,12 +2,9 @@
 /**
  * Plate — the reserved image position in the catalogue.
  *
- * Featherstone Vaults photography has not been supplied. Rather than
- * illustrate the catalogue with pictures of objects the house does not hold,
- * each image position renders a flat tonal field inside a hairline mount, with
- * a small caption. Nothing here depicts an object, and nothing is implied.
- *
- * Pass `image` and the plate is replaced by the photograph.
+ * Sale-object plates remain blank until Featherstone Vaults has real object
+ * photography. Department plates may also use explicitly credited open-access
+ * museum imagery to give the site visual context without implying ownership.
  */
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
@@ -17,7 +14,7 @@ interface Props {
   ratio?: string;
   /** Plate tone, 1–4, giving the catalogue a quiet tonal rhythm. */
   tone?: '1' | '2' | '3' | '4';
-  image?: ImageMetadata;
+  image?: ImageMetadata | string;
   alt?: string;
   sizes?: string;
   loading?: 'eager' | 'lazy';
@@ -33,6 +30,8 @@ const {
   loading = 'lazy',
   class: className = '',
 } = Astro.props;
+
+const isRemote = typeof image === 'string';
 ---
 
 <div
@@ -41,14 +40,26 @@ const {
 >
   {
     image ? (
-      <Image
-        src={image}
-        alt={alt}
-        sizes={sizes}
-        loading={loading}
-        widths={[480, 800, 1200, 1800]}
-        class="h-full w-full object-cover"
-      />
+      isRemote ? (
+        <img
+          src={image}
+          alt={alt}
+          sizes={sizes}
+          loading={loading}
+          decoding="async"
+          referrerpolicy="no-referrer"
+          class="h-full w-full object-cover"
+        />
+      ) : (
+        <Image
+          src={image}
+          alt={alt}
+          sizes={sizes}
+          loading={loading}
+          widths={[480, 800, 1200, 1800]}
+          class="h-full w-full object-cover"
+        />
+      )
     ) : (
       <span
         class="pointer-events-none absolute inset-[5.5%] block border border-[var(--line-soft)]"
