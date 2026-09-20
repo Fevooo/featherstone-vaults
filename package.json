@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
-    "build:fast": "astro build",
+    "build": "astro check && astro build && node scripts/indexnow.mjs",
+    "build:fast": "astro build && node scripts/indexnow.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
