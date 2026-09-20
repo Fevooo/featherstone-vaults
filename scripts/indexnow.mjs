@@ -81,6 +81,9 @@ function selectChangedUrls(changes, sitemapUrls) {
     'src/consts.ts',
     'src/content.config.ts',
     'astro.config.mjs',
+    'package.json',
+    'scripts/indexnow.mjs',
+    `public/${KEY}.txt`,
   ]);
 
   for (const change of changes) {
