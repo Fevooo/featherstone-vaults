@@ -25,22 +25,24 @@ const plateImage = image ?? remoteImage;
     image={plateImage}
     alt={imageAlt ?? ''}
     sizes={sizes}
-    class="transition-[filter] duration-500 group-hover:brightness-[1.4]"
+    class="bg-charcoal [&_img]:scale-[1.015] [&_img]:opacity-[0.84] [&_img]:brightness-[0.70] [&_img]:contrast-[1.12] [&_img]:saturate-[0.62] [&_img]:grayscale-[0.18] [&_img]:transition-all [&_img]:duration-700 group-hover:[&_img]:scale-[1.03] group-hover:[&_img]:opacity-[0.93] group-hover:[&_img]:brightness-[0.80] group-hover:[&_img]:saturate-[0.80]"
   />
 
-  <div class="relative mt-5">
+  <div class="relative mt-6 md:mt-5">
     <span
       class="block h-px w-9 bg-bronze transition-[width] duration-500 ease-out group-hover:w-full"
     ></span>
     <div class="mt-4 flex items-baseline gap-3">
       <span class="label-sm tnum shrink-0 text-ash">{number}</span>
       <h3
-        class="display-3 min-h-[2.44em] text-parchment transition-colors duration-300 group-hover:text-ivory"
+        class="display-3 min-h-[2.35em] leading-[1.15] text-parchment transition-colors duration-300 group-hover:text-ivory"
       >
         {shortTitle ?? title}
       </h3>
     </div>
-    <p class="label-sm mt-3 text-ash">
+    <p
+      class="mt-3 min-h-[3.1em] font-sans text-[0.625rem] font-normal uppercase leading-[1.6] tracking-[0.15em] text-ash sm:text-[0.6875rem] sm:tracking-[0.18em]"
+    >
       {keywords.join(' · ')}
     </p>
   </div>
