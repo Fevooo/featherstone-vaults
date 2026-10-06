@@ -1,0 +1,7 @@
+[images]
+  remote_images = [
+    'https://commons\.wikimedia\.org/.*',
+    'https://upload\.wikimedia\.org/.*',
+    'https://images\.metmuseum\.org/.*',
+    'https://science\.nasa\.gov/.*'
+  ]

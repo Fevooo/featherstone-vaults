@@ -38,9 +38,22 @@ interface Props {
 }
 
 const { department, current, archived, siblings } = Astro.props;
-const { title, intro, scope, seoTitle, seoDescription, keywords, image, imageAlt, buying } =
-  department.data;
+const {
+  title,
+  intro,
+  scope,
+  seoTitle,
+  seoDescription,
+  keywords,
+  image,
+  remoteImage,
+  imageAlt,
+  imageCredit,
+  imageSourceUrl,
+  buying,
+} = department.data;
 const path = `/collections/${department.id}`;
+const plateImage = image ?? remoteImage;
 ---
 
 <Page
@@ -64,15 +77,33 @@ const path = `/collections/${department.id}`;
 
   <div class="shell">
     {
-      image && (
-        <Plate
-          ratio="21 / 9"
-          image={image}
-          alt={imageAlt ?? ''}
-          loading="eager"
-          sizes="(min-width: 1536px) 1440px, 100vw"
-          class="mb-16 md:mb-20"
-        />
+      plateImage && (
+        <figure class="mb-16 md:mb-20">
+          <Plate
+            ratio="21 / 9"
+            image={plateImage}
+            alt={imageAlt ?? ''}
+            loading="eager"
+            sizes="(min-width: 1536px) 1440px, 100vw"
+            class="bg-charcoal [&_img]:scale-[1.01] [&_img]:opacity-[0.88] [&_img]:brightness-[0.72] [&_img]:contrast-[1.10] [&_img]:saturate-[0.68] [&_img]:grayscale-[0.12]"
+          />
+          {imageCredit && (
+            <figcaption class="label-sm mt-3 text-ash">
+              Representative collection image ·{' '}
+              {imageSourceUrl ? (
+                <a
+                  href={imageSourceUrl}
+                  rel="external nofollow"
+                  class="transition-colors hover:text-parchment"
+                >
+                  {imageCredit}
+                </a>
+              ) : (
+                imageCredit
+              )}
+            </figcaption>
+          )}
+        </figure>
       )
     }
 

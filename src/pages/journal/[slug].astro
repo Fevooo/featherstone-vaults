@@ -1,51 +1,105 @@
 ---
-import type { GetStaticPaths } from 'astro';
-import { render } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import Plate from '../../components/Plate.astro';
-import { SITE } from '../../consts';
-import { getJournal, formatDate, type JournalEntry } from '../../lib/catalogue';
-import { ogImageFrom } from '../../lib/site-images';
+import type { GetStaticPaths } from 'astro'
+import { render } from 'astro:content'
+import Base from '../../layouts/Base.astro'
+import Breadcrumbs from '../../components/Breadcrumbs.astro'
+import Plate from '../../components/Plate.astro'
+import { SITE } from '../../consts'
+import { getJournal, formatDate, type JournalEntry } from '../../lib/catalogue'
+import { ogImageFrom } from '../../lib/site-images'
 
 export const getStaticPaths = (async () => {
-  const articles = await getJournal();
+  const articles = await getJournal()
   return articles.map((article, i) => ({
     params: { slug: article.id },
     props: {
       article,
       next: articles[i + 1] ?? articles[0],
     },
-  }));
-}) satisfies GetStaticPaths;
+  }))
+}) satisfies GetStaticPaths
 
 interface Props {
-  article: JournalEntry;
-  next: JournalEntry;
+  article: JournalEntry
+  next: JournalEntry
 }
 
-const { article, next } = Astro.props;
-const d = article.data;
-const path = `/journal/${article.id}`;
-const { Content } = await render(article);
-const ogImage = await ogImageFrom(d.image);
+const { article, next } = Astro.props
+const d = article.data
+const path = `/journal/${article.id}`
+const articleUrl = new URL(path, SITE.url).href
+const { Content } = await render(article)
 
-const articleJsonLd = d.inPreparation
+const heroImage = d.image ?? d.remoteImage
+const ogImage = d.image ? await ogImageFrom(d.image) : d.remoteImage
+const articleImageUrl = ogImage ? new URL(ogImage, SITE.url).href : undefined
+
+const collectionLabels: Record<string, string> = {
+  antiquities: 'Antiquities',
+  'natural-history': 'Natural History',
+  timepieces: 'Timepieces',
+  'shipwreck-maritime': 'Shipwreck & Maritime',
+  'space-exploration': 'Space & Exploration',
+}
+
+const relatedCollection = d.collection
+  ? {
+      slug: d.collection,
+      label: collectionLabels[d.collection] ?? d.collection,
+    }
+  : null
+
+const structuredData = d.inPreparation
   ? null
   : {
       '@context': 'https://schema.org',
-      '@type': 'Article',
-      headline: d.title,
-      description: d.seoDescription,
-      articleSection: d.subject,
-      url: new URL(path, SITE.url).href,
-      datePublished: d.published?.toISOString(),
-      dateModified: (d.updated ?? d.published)?.toISOString(),
-      author: { '@id': `${SITE.url}/#organization` },
-      publisher: { '@id': `${SITE.url}/#organization` },
-      isAccessibleForFree: true,
-      inLanguage: 'en-GB',
-    };
+      '@graph': [
+        {
+          '@type': 'Article',
+          '@id': `${articleUrl}#article`,
+          headline: d.title,
+          description: d.seoDescription,
+          articleSection: d.subject,
+          url: articleUrl,
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': articleUrl,
+          },
+          isPartOf: { '@id': `${SITE.url}/#website` },
+          datePublished: d.published?.toISOString(),
+          dateModified: (d.updated ?? d.published)?.toISOString(),
+          author: { '@id': `${SITE.url}/#organization` },
+          publisher: { '@id': `${SITE.url}/#organization` },
+          image: articleImageUrl,
+          keywords: d.keywords,
+          about: d.keywords.map((name) => ({
+            '@type': 'Thing',
+            name,
+          })),
+          citation: d.sources.map((source) => source.url),
+          isAccessibleForFree: true,
+          inLanguage: 'en-GB',
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': `${articleUrl}#breadcrumbs`,
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Journal',
+              item: `${SITE.url}/journal`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: d.title,
+              item: articleUrl,
+            },
+          ],
+        },
+      ],
+    }
 ---
 
 <Base
@@ -73,15 +127,31 @@ const articleJsonLd = d.inPreparation
         <h1 class="display-1 mt-7 max-w-[20ch] text-ivory">{d.title}</h1>
         <p class="prose-fv mt-8 max-w-[38rem] text-parchment md:mt-10">{d.standfirst}</p>
         {
-          d.image && (
-            <Plate
-              ratio="16 / 9"
-              image={d.image}
-              alt={d.imageAlt ?? ''}
-              loading="eager"
-              sizes="(min-width: 1536px) 1440px, 100vw"
-              class="mt-12 md:mt-14"
-            />
+          heroImage && (
+            <>
+              <Plate
+                ratio="16 / 9"
+                image={heroImage}
+                alt={d.imageAlt ?? ''}
+                loading="eager"
+                sizes="(min-width: 1536px) 1440px, 100vw"
+                class="mt-12 md:mt-14"
+              />
+              {d.imageCredit && (
+                <p class="meta mt-3 text-ash">
+                  {d.imageSourceUrl ? (
+                    <a
+                      href={d.imageSourceUrl}
+                      class="transition-colors hover:text-parchment"
+                    >
+                      {d.imageCredit}
+                    </a>
+                  ) : (
+                    d.imageCredit
+                  )}
+                </p>
+              )}
+            </>
           )
         }
       </header>
@@ -124,6 +194,16 @@ const articleJsonLd = d.inPreparation
                     </dd>
                   </div>
                 )}
+                {d.updated && (
+                  <div class="rule-soft-t py-3">
+                    <dt class="label-sm text-ash">Updated</dt>
+                    <dd class="meta mt-1 text-parchment">
+                      <time datetime={d.updated.toISOString().slice(0, 10)}>
+                        {formatDate(d.updated)}
+                      </time>
+                    </dd>
+                  </div>
+                )}
                 <div class="rule-soft-t py-3">
                   <dt class="label-sm text-ash">Subject</dt>
                   <dd class="meta mt-1 text-parchment">{d.subject}</dd>
@@ -136,10 +216,44 @@ const articleJsonLd = d.inPreparation
                 )}
               </dl>
             </aside>
+
             <div class="lg:col-span-8 lg:col-start-4">
               <div class="prose-fv">
                 <Content />
               </div>
+
+              {d.sources.length > 0 && (
+                <section class="mt-16 rule-t pt-8" aria-labelledby="sources-heading">
+                  <h2 id="sources-heading" class="label-sm text-bronze-lit">
+                    Sources consulted
+                  </h2>
+                  <ul class="mt-5 space-y-3">
+                    {d.sources.map((source) => (
+                      <li>
+                        <a
+                          href={source.url}
+                          class="meta text-parchment transition-colors hover:text-ivory"
+                        >
+                          {source.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {relatedCollection && (
+                <div class="mt-12 rule-t pt-8">
+                  <p class="label-sm text-ash">Related collection</p>
+                  <a
+                    href={`/collections/${relatedCollection.slug}`}
+                    class="action-quiet mt-4"
+                  >
+                    {relatedCollection.label}
+                  </a>
+                </div>
+              )}
+
               <img
                 src="/brand/icon-bronze.svg"
                 alt=""
@@ -166,5 +280,7 @@ const articleJsonLd = d.inPreparation
     </nav>
   </div>
 
-  {articleJsonLd && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} is:inline />}
+  {structuredData && (
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
+  )}
 </Base>
