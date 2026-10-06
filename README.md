@@ -199,9 +199,11 @@ button colours. It is used once on the homepage, deliberately.
 
 ## Forms
 
-Four forms post to `/api/enquiry`, handled by the serverless function in
-`functions/api/enquiry.ts`. They work without JavaScript (native form POST) and
-are progressively enhanced to submit in place.
+Four forms post to `/api/enquiry`, handled by the Netlify Function in
+`netlify/functions/enquiry.mts`. The function pins its own route with
+`config.path`, so the endpoint does not depend on a redirect rule. The forms
+work without JavaScript (native form POST) and are progressively enhanced to
+submit in place.
 
 Set these with the active hosting provider to make them deliver:
 
@@ -228,8 +230,10 @@ Build settings:
 | Build output directory | `dist` |
 | Node version | 22 |
 
-`public/_headers` sets immutable caching for fonts and hashed assets plus the
-usual security headers.
+Deployment is Netlify. `netlify.toml` allows the remote image sources used by
+the department plates; `public/_headers` sets immutable caching for fonts and
+hashed assets plus the usual security headers, and Netlify reads it from the
+publish directory.
 
 URLs have no trailing slash (`build.format: 'file'`).
 

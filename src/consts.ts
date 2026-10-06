@@ -12,7 +12,7 @@ export const SITE = {
   email: 'enquiries@featherstonevaults.com',
   /**
    * Set to a POST endpoint to make the enquiry forms live.
-   * The bundled Cloudflare Pages Function at /api/enquiry is used by default.
+   * Served by the Netlify Function in netlify/functions/enquiry.mts.
    */
   formEndpoint: '/api/enquiry',
 } as const;
