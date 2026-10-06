@@ -1,6 +1,42 @@
 import type { APIRoute } from 'astro';
+import { execFileSync } from 'node:child_process';
 import { SITE } from '../consts';
 import { getDepartments, getAllObjects, getJournal } from '../lib/catalogue';
+
+/**
+ * Last modification date for a source file, taken from git. Falls back to
+ * undefined outside a checkout (some CI images build from a tarball), in which
+ * case the entry simply carries no lastmod rather than a invented one.
+ */
+function gitLastModified(file: string): Date | undefined {
+  try {
+    const iso = execFileSync('git', ['log', '-1', '--format=%cI', '--', file], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return iso ? new Date(iso) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const PAGE_SOURCE: Record<string, string> = {
+  '/': 'src/pages/index.astro',
+  '/objects': 'src/pages/objects/index.astro',
+  '/collections': 'src/pages/collections/index.astro',
+  '/archive': 'src/pages/archive.astro',
+  '/journal': 'src/pages/journal/index.astro',
+  '/private-acquisitions': 'src/pages/private-acquisitions.astro',
+  '/sell-an-object': 'src/pages/sell-an-object.astro',
+  '/consignments': 'src/pages/consignments.astro',
+  '/private-access': 'src/pages/private-access.astro',
+  '/provenance-authenticity': 'src/pages/provenance-authenticity.astro',
+  '/about': 'src/pages/about.astro',
+  '/enquire': 'src/pages/enquire.astro',
+  '/shipping': 'src/pages/shipping.astro',
+  '/terms': 'src/pages/terms.astro',
+  '/privacy': 'src/pages/privacy.astro',
+};
 
 /**
  * The sitemap is generated from the catalogue rather than from the build
@@ -34,6 +70,7 @@ export const GET: APIRoute = async () => {
     path,
     priority,
     changefreq,
+    lastmod: PAGE_SOURCE[path] ? gitLastModified(PAGE_SOURCE[path]) : undefined,
   }));
 
   for (const department of await getDepartments()) {
@@ -41,6 +78,7 @@ export const GET: APIRoute = async () => {
       path: `/collections/${department.id}`,
       priority: 0.8,
       changefreq: 'weekly',
+      lastmod: gitLastModified(`src/content/collections/${department.id}.md`),
     });
   }
 
@@ -50,7 +88,7 @@ export const GET: APIRoute = async () => {
       path: `/objects/${object.id}`,
       priority: object.data.availability === 'SOLD' ? 0.5 : 0.8,
       changefreq: object.data.availability === 'SOLD' ? 'yearly' : 'weekly',
-      lastmod: object.data.soldDate,
+      lastmod: object.data.soldDate ?? gitLastModified(`src/content/objects/${object.id}.md`),
     });
   }
 
@@ -60,7 +98,10 @@ export const GET: APIRoute = async () => {
       path: `/journal/${article.id}`,
       priority: 0.7,
       changefreq: 'yearly',
-      lastmod: article.data.updated ?? article.data.published,
+      lastmod:
+        article.data.updated ??
+        article.data.published ??
+        gitLastModified(`src/content/journal/${article.id}.md`),
     });
   }
 

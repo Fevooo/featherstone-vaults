@@ -238,9 +238,21 @@ page that marks itself `noindex`.
 `robots.txt` allows all legitimate crawlers, including AI search and answer
 engines.
 
-Structured data: `Organization` and `WebSite` on every page, `BreadcrumbList` on
-every page with a trail, `Product` + `Offer` on genuine object pages, and
-`Article` on published journal entries.
+Structured data: `Organization` (with contact point and offered service) and
+`WebSite` on every page, `BreadcrumbList` on every page with a trail,
+`CollectionPage` + `ItemList` on the catalogue, collections, department and
+archive pages, `Product` + `Offer` on genuine object pages, and `Article` on
+published journal entries. Specimens appear in an `ItemList` as plain named
+items with no offer attached.
+
+`/journal/rss.xml` is a feed of published articles, linked from every page.
+`/llms.txt` is a generated plain-language map of the site for AI search and
+answer engines; it states explicitly that the shipped catalogue entries are
+format specimens, so an answer engine cannot present them as stock.
+
+Department pages carry the bulk of the indexable copy: how the house assesses
+material in that field, what is supplied with it, and the questions a buyer
+should ask. It lives in the `buying` array in each collection's front matter.
 
 Specimen objects and unpublished journal entries emit `noindex, follow`, are left
 out of the sitemap and carry no `Product`/`Article` data, so nothing fictional

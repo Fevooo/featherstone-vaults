@@ -1,0 +1,69 @@
+---
+import { SITE } from '../consts';
+
+/**
+ * CollectionPage + ItemList for the pages that are lists: the catalogue index,
+ * the collections index, each department and the archive.
+ *
+ * Only genuine entries are described as products. Catalogue specimens are
+ * listed as plain items with a URL and a name, so that a search engine
+ * understands the page structure without being told that a non-existent object
+ * is for sale.
+ */
+export interface ListingItem {
+  name: string;
+  url: string;
+  /** Present only for objects genuinely offered. */
+  offer?: { price?: number; currency: string; availability: string };
+}
+
+interface Props {
+  name: string;
+  description: string;
+  path: string;
+  items: ListingItem[];
+}
+
+const { name, description, path, items } = Astro.props;
+const abs = (p: string) => new URL(p, SITE.url).href.replace(/\/$/, '') || SITE.url;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${abs(path)}#page`,
+  name,
+  description,
+  url: abs(path),
+  isPartOf: { '@id': `${SITE.url}/#website` },
+  about: { '@id': `${SITE.url}/#organization` },
+  inLanguage: 'en-GB',
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: items.length,
+    itemListOrder: 'https://schema.org/ItemListOrderAscending',
+    itemListElement: items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: abs(item.url),
+      ...(item.offer
+        ? {
+            item: {
+              '@type': 'Product',
+              name: item.name,
+              url: abs(item.url),
+              offers: {
+                '@type': 'Offer',
+                priceCurrency: item.offer.currency,
+                ...(item.offer.price !== undefined ? { price: item.offer.price } : {}),
+                availability: item.offer.availability,
+                seller: { '@id': `${SITE.url}/#organization` },
+              },
+            },
+          }
+        : { name: item.name }),
+    })),
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />

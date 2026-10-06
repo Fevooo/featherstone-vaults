@@ -26,6 +26,22 @@ const organisation = {
     addressCountry: SITE.countryCode,
   },
   areaServed: 'Worldwide',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'sales',
+    email: SITE.email,
+    areaServed: 'Worldwide',
+    availableLanguage: 'English',
+  },
+  makesOffer: {
+    '@type': 'Offer',
+    itemOffered: {
+      '@type': 'Service',
+      name: 'Private acquisition and sourcing',
+      description:
+        'Sourcing significant historical, scientific and natural history objects privately on behalf of collectors.',
+    },
+  },
   knowsAbout: [
     'Antiquities',
     'Natural history specimens',
@@ -62,6 +78,12 @@ const website = {
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap.xml" type="application/xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="The Featherstone Vaults Journal"
+      href="/journal/rss.xml"
+    />
 
     <link
       rel="preload"

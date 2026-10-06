@@ -24,6 +24,21 @@ const collectionsCollection = defineCollection({
       keywords: z.array(z.string()).min(2).max(4),
       /** Longer introduction shown at the head of the collection page. */
       intro: z.string(),
+
+      /**
+       * Department-specific guidance for buyers. This is the substance of the
+       * collection page: how the house assesses material in this field, what
+       * is supplied with it, and the questions a buyer should be asking.
+       * First-party practice, not scholarship about individual objects.
+       */
+      buying: z
+        .array(
+          z.object({
+            heading: z.string(),
+            body: z.array(z.string()).min(1),
+          }),
+        )
+        .default([]),
       plateTone: z.enum(['1', '2', '3', '4']).default('1'),
 
       /**

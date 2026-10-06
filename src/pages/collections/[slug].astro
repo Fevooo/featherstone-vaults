@@ -3,9 +3,11 @@ import type { GetStaticPaths } from 'astro';
 import Page from '../../layouts/Page.astro';
 import ObjectTile from '../../components/ObjectTile.astro';
 import Plate from '../../components/Plate.astro';
+import ListingSchema from '../../components/ListingSchema.astro';
 import {
   getDepartments,
   getObjectsInDepartment,
+  listingItem,
   type DepartmentEntry,
   type ObjectEntry,
 } from '../../lib/catalogue';
@@ -36,7 +38,7 @@ interface Props {
 }
 
 const { department, current, archived, siblings } = Astro.props;
-const { title, intro, scope, seoTitle, seoDescription, keywords, image, imageAlt } =
+const { title, intro, scope, seoTitle, seoDescription, keywords, image, imageAlt, buying } =
   department.data;
 const path = `/collections/${department.id}`;
 ---
@@ -53,6 +55,13 @@ const path = `/collections/${department.id}`;
     { label: title, href: path },
   ]}
 >
+  <ListingSchema
+    name={title}
+    description={seoDescription}
+    path={path}
+    items={[...current, ...archived].map(listingItem)}
+  />
+
   <div class="shell">
     {
       image && (
@@ -114,6 +123,56 @@ const path = `/collections/${department.id}`;
         )
       }
     </section>
+
+    {
+      buying.length > 0 && (
+        <section class="pt-24 md:pt-32" aria-labelledby="buying-heading">
+          <h2 id="buying-heading" class="label-sm rule-t py-5 text-bronze-lit">
+            Buying in this department
+          </h2>
+
+          <div class="mt-8 grid gap-x-16 gap-y-10 lg:grid-cols-12">
+            <div class="lg:col-span-8 lg:col-start-4">
+              {buying.map((section) => (
+                <section class="rule-soft-t py-9 first:border-t-0 first:pt-0">
+                  <h3 class="display-2 max-w-[24ch] text-ivory">{section.heading}</h3>
+                  <div class="prose-fv mt-5 max-w-[40rem]">
+                    {section.body.map((paragraph) => (
+                      <p>{paragraph}</p>
+                    ))}
+                  </div>
+                </section>
+              ))}
+
+              <div class="rule-soft-t pt-9">
+                <h3 class="label-sm text-ash">Further reading</h3>
+                <ul class="prose-fv mt-5 max-w-[40rem]">
+                  <li>
+                    <a href="/provenance-authenticity">
+                      How we establish provenance and authenticity
+                    </a>{' '}
+                    sets out what we check before an object is offered, and what we will not
+                    claim.
+                  </li>
+                  <li>
+                    <a href="/shipping">Shipping and export</a> covers packing, insurance, UK
+                    export licensing and import duties.
+                  </li>
+                  <li>
+                    <a href="/private-acquisitions">Private acquisitions</a> is the route when
+                    what you want is not in the catalogue.
+                  </li>
+                  <li>
+                    <a href="/sell-an-object">Selling or consigning</a> in this department,
+                    whether a single object or a collection.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      )
+    }
 
     {
       archived.length > 0 && (

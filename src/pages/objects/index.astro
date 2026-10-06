@@ -1,7 +1,13 @@
 ---
 import Page from '../../layouts/Page.astro';
 import ObjectTile from '../../components/ObjectTile.astro';
-import { getCurrentObjects, getDepartments, getArchivedObjects } from '../../lib/catalogue';
+import ListingSchema from '../../components/ListingSchema.astro';
+import {
+  getCurrentObjects,
+  getDepartments,
+  getArchivedObjects,
+  listingItem,
+} from '../../lib/catalogue';
 
 const objects = await getCurrentObjects();
 const departments = await getDepartments();
@@ -19,6 +25,13 @@ const available = departments.filter((d) => present.has(d.id));
   standfirst="Objects are listed as they are catalogued. Each entry carries its classification, condition and documentary position. Anything not yet established is shown as not yet established."
   trail={[{ label: 'Objects', href: '/objects' }]}
 >
+  <ListingSchema
+    name="The current catalogue"
+    description="Objects currently held by Featherstone Vaults."
+    path="/objects"
+    items={objects.map(listingItem)}
+  />
+
   <div class="shell">
     {
       available.length > 0 && (

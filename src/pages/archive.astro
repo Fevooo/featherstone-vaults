@@ -1,7 +1,13 @@
 ---
 import Page from '../layouts/Page.astro';
 import ObjectTile from '../components/ObjectTile.astro';
-import { getArchivedObjects, getDepartments, formatMonthYear } from '../lib/catalogue';
+import ListingSchema from '../components/ListingSchema.astro';
+import {
+  getArchivedObjects,
+  getDepartments,
+  formatMonthYear,
+  listingItem,
+} from '../lib/catalogue';
 
 const archived = await getArchivedObjects();
 const departments = await getDepartments();
@@ -17,6 +23,13 @@ const departmentTitle = (id: string) => departments.find((d) => d.id === id)?.da
   standfirst="Objects that have been sold are not deleted. Their entries stay here permanently, so that a future owner, a researcher or an insurer can find what was recorded about an object at the time it changed hands."
   trail={[{ label: 'Archive', href: '/archive' }]}
 >
+  <ListingSchema
+    name="Featherstone Vaults Archive"
+    description="Objects that have passed through Featherstone Vaults, retained as a permanent record."
+    path="/archive"
+    items={archived.map(listingItem)}
+  />
+
   <div class="shell">
     <div class="grid gap-x-16 gap-y-10 rule-t pt-10 lg:grid-cols-12">
       <h2 class="label-sm text-bronze-lit lg:col-span-3">Why it is kept</h2>

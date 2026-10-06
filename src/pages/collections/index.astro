@@ -1,6 +1,7 @@
 ---
 import Page from '../../layouts/Page.astro';
 import CollectionPanel from '../../components/CollectionPanel.astro';
+import ListingSchema from '../../components/ListingSchema.astro';
 import { getDepartments, getAllObjects } from '../../lib/catalogue';
 
 const departments = await getDepartments();
@@ -20,7 +21,40 @@ const countIn = (id: string) =>
   standfirst="Six principal departments and four specialist ones. The division reflects how the objects are researched and catalogued rather than how they are sold."
   trail={[{ label: 'Collections', href: '/collections' }]}
 >
-  <section class="shell" aria-labelledby="primary-heading">
+  <ListingSchema
+    name="Collections"
+    description="The ten collecting departments of Featherstone Vaults."
+    path="/collections"
+    items={departments.map((d) => ({ name: d.data.title, url: `/collections/${d.id}` }))}
+  />
+
+  <section class="shell">
+    <div class="grid gap-x-16 gap-y-10 rule-t pt-10 lg:grid-cols-12">
+      <h2 class="label-sm text-bronze-lit lg:col-span-3">How the departments work</h2>
+      <div class="prose-fv max-w-[40rem] lg:col-span-8 lg:col-start-4">
+        <p>
+          The six principal departments are the fields we buy in continuously. The four
+          specialist departments hold material that comes up less often, usually through a
+          private route rather than the open market, and a good deal of it is placed before it
+          reaches this catalogue.
+        </p>
+        <p>
+          Every department is catalogued to the same standard, whatever the value of the object.
+          The classification, condition report, documentary position and the questions a buyer
+          should be asking are set out on each department page, because what matters in a fossil
+          is not what matters in a manuscript and a single house standard written in general
+          terms would be useless to both.
+        </p>
+        <p>
+          If an object interests you and it does not sit in any of these, it is still worth
+          asking. The departments describe what we hold most often, not the limit of what we
+          will consider.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell pt-20 md:pt-28" aria-labelledby="primary-heading">
     <h2 id="primary-heading" class="label-sm rule-t py-5 text-bronze-lit">Principal departments</h2>
 
     <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-14 md:grid-cols-3 md:gap-x-7 lg:gap-x-8">

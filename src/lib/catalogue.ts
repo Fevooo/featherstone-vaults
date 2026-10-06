@@ -61,6 +61,30 @@ export async function getPublishedJournal(): Promise<JournalEntry[]> {
   return (await getJournal()).filter((a) => !a.data.inPreparation);
 }
 
+
+/** Shapes an object for ListingSchema, omitting offers for specimens. */
+export function listingItem(object: ObjectEntry) {
+  const d = object.data;
+  return {
+    name: d.title,
+    url: `/objects/${object.id}`,
+    ...(d.specimen
+      ? {}
+      : {
+          offer: {
+            price: d.priceOnApplication ? undefined : d.price,
+            currency: d.currency,
+            availability:
+              d.availability === 'AVAILABLE'
+                ? 'https://schema.org/InStock'
+                : d.availability === 'RESERVED'
+                  ? 'https://schema.org/PreOrder'
+                  : 'https://schema.org/SoldOut',
+          },
+        }),
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /* Formatting                                                          */
 /* ------------------------------------------------------------------ */

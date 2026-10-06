@@ -1,5 +1,8 @@
 # featherstonevaults.com
 # All legitimate crawlers, including AI search and answer engines, are welcome.
+# Catalogue specimens and unpublished writing carry a noindex tag on the page
+# itself rather than being blocked here, so that crawlers can see the structure
+# of the site without indexing entries that do not describe real objects.
 
 User-agent: *
 Allow: /
