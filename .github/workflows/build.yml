@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - claude/gallant-gates-eopp5s
   pull_request:
     branches:
       - main
