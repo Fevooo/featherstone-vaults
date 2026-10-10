@@ -1,14 +1,76 @@
 ---
 import Page from '../layouts/Page.astro';
+import FaqSection, { type Faq } from '../components/FaqSection.astro';
+import { SITE } from '../consts';
+
+/**
+ * The commercial terms live here, at the top, so the figures can be filled in
+ * with one edit when they are settled. Anything left undefined renders as the
+ * honest "agreed per object" wording rather than an invented number.
+ */
+const TERMS = {
+  /** e.g. '15 per cent' or 'between 10 and 20 per cent by value'. */
+  commission: undefined as string | undefined,
+  /** e.g. 'within 14 days of cleared funds'. */
+  settlement: 'within the period set out in the agreement',
+  /** e.g. '£1,000'. */
+  minimumValue: undefined as string | undefined,
+};
+
+const suits = [
+  {
+    title: 'A single object of real quality',
+    body: 'Something worth cataloguing properly and placing with the right person, rather than moving quickly at whatever it will fetch today.',
+  },
+  {
+    title: 'A collection assembled in one field',
+    body: 'Where the coherence of the group is part of the value, and breaking it up would destroy the thing that made it worth having.',
+  },
+  {
+    title: 'An inherited collection',
+    body: 'Material that has come out of an estate, often undocumented, and frequently more significant than the family expects.',
+  },
+  {
+    title: 'An owner who is not in a hurry',
+    body: 'Consignment trades speed for result. If you need the money this month, say so and we will tell you honestly that an outright offer is the better route.',
+  },
+];
+
+const routes = [
+  {
+    title: 'Outright sale to us',
+    terms: 'Fastest. Certain. Lowest figure.',
+    body: [
+      'We buy the object and you are paid once title passes. There is no waiting and no outcome to wait for, because the risk and the capital become ours from that moment.',
+      'You will get less than a successful consignment would return, and that difference is the price of certainty. It is the right route when you need the money on a known date, when the object is modest, or when you simply want it dealt with.',
+    ],
+  },
+  {
+    title: 'Consignment through us',
+    terms: 'Slower. Best net result. You keep ownership.',
+    body: [
+      'We catalogue, photograph, research and offer the object. You retain ownership until it sells, and you receive the sale figure less the agreed commission.',
+      'It takes longer and it is not guaranteed. In exchange the object is described properly, offered to people who are actually looking for it, and not pushed into a sale on a date that suits someone else.',
+    ],
+  },
+  {
+    title: 'Sale at auction',
+    terms: 'Wide reach. A fixed date. Least control.',
+    body: [
+      'An auction gives breadth of exposure and a date certain, which genuinely matters for some material. Fees are charged to both the seller and the buyer, and the catalogue description is written by the saleroom rather than by you.',
+      'The thing to weigh is what happens if it does not sell. An unsold lot leaves a public record against the object, and that result follows it into any later attempt to place it. For strong, well-documented material we will tell you when auction is the better route, and which department to approach.',
+    ],
+  },
+];
 
 const stages = [
   {
     title: 'Assessment',
-    body: 'We examine the object, research what can be established about it, and give you a written view of what it is and what we expect it to achieve. If consignment is not the right route, we say so.',
+    body: 'We examine the object, research what can be established about it, and give you a written view of what it is and what we expect it to achieve. If consignment is not the right route, we say so and tell you what is.',
   },
   {
     title: 'Terms',
-    body: 'Commission, reserve, duration and the basis on which the object is held are agreed in writing before anything moves. There are no separate charges for cataloguing, photography or research.',
+    body: 'Commission, reserve, duration and the basis on which the object is held are agreed in writing before anything moves. There are no separate charges for cataloguing, photography, research, storage or insurance.',
   },
   {
     title: 'Cataloguing',
@@ -16,28 +78,176 @@ const stages = [
   },
   {
     title: 'Offering',
-    body: 'The object is offered through the catalogue, to the Private Access list, and directly to collectors we believe are the right buyers for it.',
+    body: 'The object is offered through the catalogue, to the Private Access list, and directly to collectors we believe are the right buyers for it. We will tell you who has asked about it.',
   },
   {
     title: 'Settlement',
-    body: 'You are paid on cleared funds, within the period set out in the agreement. You retain ownership until then and can withdraw the object on notice.',
+    body: `You are paid on cleared funds, ${TERMS.settlement}. You retain ownership until then and can withdraw the object on notice.`,
   },
 ];
+
+const faqs: Faq[] = [
+  {
+    question: 'What does consignment cost?',
+    answer: [
+      TERMS.commission
+        ? `Commission is ${TERMS.commission}, agreed in writing before the object moves, and it is the only deduction.`
+        : 'Commission is agreed in writing for each object before it moves, and it is the only deduction. It is set against what we think the object will realistically achieve, not against a hopeful figure.',
+      'Cataloguing, photography, research, secure storage and insurance are not charged separately. If conservation is worth doing we will quote it and you decide; we never commit you to work you have not agreed.',
+    ],
+  },
+  {
+    question: 'How long does it take to sell?',
+    answer: [
+      'It depends entirely on the object. Something that a known collector is already looking for can be placed in weeks. Material with a narrow audience can take a year or more, and occasionally the honest answer is that the right buyer has not appeared yet.',
+      'We agree a duration at the outset and review it with you rather than letting an object sit indefinitely.',
+    ],
+  },
+  {
+    question: 'Who owns it while you have it?',
+    answer: [
+      'You do. Title stays with you until the object sells and you have been paid. Consignment is not a sale to us, and the object is never treated as our stock.',
+    ],
+  },
+  {
+    question: 'Is it insured, and where is it kept?',
+    answer: [
+      'Consigned objects are held in secure, environmentally stable storage and are insured for the agreed value from the moment they arrive, at our cost.',
+      'They are not lent, displayed publicly, or subjected to any treatment without your written agreement.',
+    ],
+  },
+  {
+    question: 'What if it does not sell?',
+    answer: [
+      'You get it back, at our cost, in the condition it arrived. There is no penalty and no fee for an unsold object.',
+      'Unlike an unsold auction lot, nothing is published against the object, so a later attempt to place it does not start from a public failure.',
+    ],
+  },
+  {
+    question: 'Can I withdraw it?',
+    answer: [
+      'Yes, on notice, at any point before a sale is agreed. The notice period is set out in the agreement so that we are not negotiating with a buyer on something that is about to be withdrawn.',
+    ],
+  },
+  {
+    question: 'Do you take whole collections, or only single objects?',
+    answer: [
+      'Both. A collection assembled in one field is often the more interesting proposition, because the group tells you something the individual objects do not.',
+      'We keep groups together wherever possible. Breaking a coherent collection for margin destroys the thing that made it worth having, and it cannot be undone.',
+    ],
+  },
+  {
+    question: 'I have inherited a collection and do not know what any of it is. Where do I start?',
+    answer: [
+      'Photographs and whatever paperwork came with it. You do not need to identify anything first, and you should not throw away labels, invoices, letters or old boxes before someone has looked at them, because the documentation is often worth more than people expect.',
+      'We will tell you what the material is, what is worth selling and what is not, and whether we are the right people to handle it. Where a formal valuation is needed for probate or insurance we will say so and point you to a qualified valuer, because that is a different exercise from selling.',
+    ],
+  },
+  {
+    question: 'What will you not take?',
+    answer: [
+      'Anything where ownership cannot be established, anything we believe has left its country of origin unlawfully, and material that is simply not good enough to justify the work. We would rather decline than catalogue something we cannot stand behind.',
+      'If we decline, we will usually tell you where it should go instead.',
+    ],
+  },
+  {
+    question: 'Do you buy outright as well?',
+    answer: [
+      'Yes. Where that is the better route for you we will make an offer and say plainly why we think it beats consignment in your case. Our interest is disclosed either way.',
+    ],
+  },
+];
+
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': `${SITE.url}/consignments#service`,
+  name: 'Consignment and private sale',
+  serviceType: 'Art and antiques consignment',
+  description:
+    'Consignment of individual objects, specialist collections and inherited collections. The owner retains title until sale; cataloguing, photography, research, storage and insurance are not charged separately.',
+  url: `${SITE.url}/consignments`,
+  provider: { '@id': `${SITE.url}/#organization` },
+  areaServed: { '@type': 'Country', name: 'United Kingdom' },
+  audience: {
+    '@type': 'Audience',
+    audienceType: 'Private owners, collectors, executors and estates',
+  },
+  termsOfService: `${SITE.url}/terms`,
+  offers: {
+    '@type': 'Offer',
+    description:
+      'Commission agreed in writing per object. No separate charge for cataloguing, photography, research, storage or insurance.',
+    seller: { '@id': `${SITE.url}/#organization` },
+  },
+};
 ---
 
 <Page
-  title="Consignments"
+  title="Consignment: Sell Antiques & Collections"
   heading="Consignment."
-  eyebrow="Services"
-  description="Consignment terms at Featherstone Vaults: assessment, written terms, full cataloguing and photography, offering and settlement. Ownership is retained until sale."
+  eyebrow="Selling"
+  description="Consign an object or a collection to Featherstone Vaults. You keep ownership until it sells. No charge for cataloguing, photography, research, storage or insurance."
   path="/consignments"
-  standfirst="Consignment suits an owner who wants an object properly catalogued and placed with the right buyer, and who is not in a hurry. You keep ownership until it sells."
-  trail={[{ label: 'Consignments', href: '/consignments' }]}
+  standfirst="Consignment suits an owner who wants an object catalogued properly and placed with the right buyer, and who is not in a hurry. You keep ownership until it sells, and the work of researching, photographing and offering it is ours."
+  trail={[{ label: 'Consignment', href: '/consignments' }]}
   headingWidth="14ch"
 >
   <div class="shell pb-24 md:pb-32">
-    <section class="rule-t pt-12" aria-labelledby="stages-heading">
+    <!-- Who it suits ------------------------------------------------- -->
+    <section class="rule-t pt-12" aria-labelledby="suits-heading">
       <div class="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+        <h2 id="suits-heading" class="label-sm text-bronze-lit lg:col-span-3">Who it suits</h2>
+        <dl class="lg:col-span-8 lg:col-start-4">
+          {
+            suits.map((item) => (
+              <div class="rule-soft-t py-6 first:border-t-0 first:pt-0">
+                <dt class="display-3 text-ivory">{item.title}</dt>
+                <dd class="prose-fv mt-3 max-w-[40rem]">{item.body}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <!-- The decision -------------------------------------------------- -->
+    <section class="pt-20 md:pt-28" aria-labelledby="routes-heading">
+      <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
+        <h2 id="routes-heading" class="label-sm text-bronze-lit lg:col-span-3">
+          Consignment, outright sale or auction
+        </h2>
+        <div class="lg:col-span-8 lg:col-start-4">
+          <p class="prose-fv max-w-[40rem]">
+            There are three sensible routes for a good object and they suit different
+            circumstances. We will tell you which one we think applies to yours, including when
+            that means sending you elsewhere.
+          </p>
+
+          <dl class="mt-10 max-w-[40rem]">
+            {
+              routes.map((route) => (
+                <div class="rule-soft-t py-7">
+                  <dt>
+                    <span class="display-3 block text-ivory">{route.title}</span>
+                    <span class="label-sm mt-2 block text-bronze-lit">{route.terms}</span>
+                  </dt>
+                  <dd class="prose-fv mt-4">
+                    {route.body.map((paragraph) => (
+                      <p>{paragraph}</p>
+                    ))}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it runs ---------------------------------------------------- -->
+    <section class="pt-20 md:pt-28" aria-labelledby="stages-heading">
+      <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
         <h2 id="stages-heading" class="label-sm text-bronze-lit lg:col-span-3">How it runs</h2>
         <ol class="lg:col-span-8 lg:col-start-4">
           {
@@ -53,6 +263,45 @@ const stages = [
       </div>
     </section>
 
+    <!-- What it costs --------------------------------------------------- -->
+    <section class="pt-20 md:pt-28" aria-labelledby="cost-heading">
+      <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
+        <h2 id="cost-heading" class="label-sm text-bronze-lit lg:col-span-3">What it costs</h2>
+        <div class="prose-fv max-w-[40rem] lg:col-span-8 lg:col-start-4">
+          <p>
+            {
+              TERMS.commission
+                ? `Commission is ${TERMS.commission}. It is agreed in writing before the object moves and it is the only deduction from the sale figure.`
+                : 'Commission is agreed in writing for each object before it moves, and it is the only deduction from the sale figure. It is set against what we believe the object will realistically achieve rather than against a flattering estimate, because an unrealistic reserve helps nobody.'
+            }
+          </p>
+          <p>There is no separate charge for any of the following.</p>
+          <ul>
+            <li>Assessment and the initial written view, whether or not you proceed.</li>
+            <li>Research, cataloguing and the condition report.</li>
+            <li>Photography.</li>
+            <li>Secure, insured storage for the duration.</li>
+            <li>Return carriage if the object does not sell.</li>
+          </ul>
+          <p>
+            Conservation is the one thing we will ever ask you to pay for, and only where we think
+            it will materially improve the result. We quote it, you decide, and we are equally
+            content to offer an object exactly as it came to us.
+          </p>
+          {
+            TERMS.minimumValue && (
+              <p>
+                We generally take material on from around {TERMS.minimumValue}. Below that the
+                work involved is hard to justify for either of us, and we will usually suggest a
+                better route.
+              </p>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- While we hold it ------------------------------------------------ -->
     <section class="pt-20 md:pt-28" aria-labelledby="care-heading">
       <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
         <h2 id="care-heading" class="label-sm text-bronze-lit lg:col-span-3">While we hold it</h2>
@@ -63,14 +312,18 @@ const stages = [
             publicly, or subjected to any treatment without your written agreement.
           </p>
           <p>
-            Where conservation would materially improve the result, we will tell you what we
-            recommend, what it costs and what it would change. The decision is yours, and we are
-            equally content to offer an object exactly as it came to us.
+            You keep title throughout. Nothing is described as ours, and the catalogue entry makes
+            no claim about ownership that is not true. How we establish and record what an object
+            is before offering it is set out under
+            <a href="/provenance-authenticity">provenance and authenticity</a>.
           </p>
         </div>
       </div>
     </section>
 
+    <FaqSection heading="Common questions" id="faq" items={faqs} />
+
+    <!-- Close ------------------------------------------------------------ -->
     <div class="pt-20 md:pt-28">
       <div class="rule-t pt-12">
         <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
@@ -79,12 +332,20 @@ const stages = [
           </h2>
           <div class="lg:col-span-6">
             <p class="prose-fv">
-              There is no charge for an initial view, and no obligation whichever way it goes.
+              There is no charge for an initial view and no obligation whichever way it goes. If
+              we are not the right people for it, we will tell you who is.
             </p>
-            <a href="/sell-an-object#submit" class="action mt-9">Submit an object</a>
+            <div
+              class="mt-9 flex flex-col items-start gap-5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-8"
+            >
+              <a href="/sell-an-object#submit" class="action action-solid">Submit an object</a>
+              <a href={`mailto:${SITE.email}`} class="action-quiet">Email us directly</a>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} is:inline />
 </Page>

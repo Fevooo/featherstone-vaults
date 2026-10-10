@@ -1,0 +1,61 @@
+---
+/**
+ * A question-and-answer block that also emits FAQPage structured data.
+ *
+ * Google withdrew FAQ rich results for most sites in 2023, so this is not
+ * here for star-rating style snippets. It is here because answer engines and
+ * AI search read FAQPage to lift a direct answer, and the questions a
+ * consignor actually types are long-tail and conversational.
+ */
+export interface Faq {
+  question: string;
+  /** Paragraphs. Plain text; keep answers short enough to be quotable. */
+  answer: string[];
+}
+
+interface Props {
+  heading: string;
+  id?: string;
+  items: Faq[];
+  /** Set false on a page that already emits FAQPage elsewhere. */
+  schema?: boolean;
+}
+
+const { heading, id = 'faq', items, schema = true } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer.join(' '),
+    },
+  })),
+};
+---
+
+<section class="pt-20 md:pt-28" aria-labelledby={`${id}-heading`}>
+  <div class="grid gap-x-16 gap-y-10 rule-t pt-12 lg:grid-cols-12">
+    <h2 id={`${id}-heading`} class="label-sm text-bronze-lit lg:col-span-3">{heading}</h2>
+
+    <dl class="lg:col-span-8 lg:col-start-4">
+      {
+        items.map((item) => (
+          <div class="rule-soft-t py-7 first:border-t-0 first:pt-0">
+            <dt class="display-3 max-w-[32ch] text-ivory">{item.question}</dt>
+            <dd class="prose-fv mt-4 max-w-[40rem]">
+              {item.answer.map((paragraph) => (
+                <p>{paragraph}</p>
+              ))}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+{schema && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />}

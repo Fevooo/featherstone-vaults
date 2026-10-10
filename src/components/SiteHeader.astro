@@ -7,7 +7,9 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
 
 <header class="sticky top-0 z-50 bg-ink/92 backdrop-blur-[2px] rule-b" data-site-header>
   <div class="shell">
-    <div class="flex h-[4.5rem] items-center justify-between gap-6 lg:h-[5.25rem]">
+    <div
+      class="flex h-[4.5rem] items-center justify-between gap-3 lg:h-[5.25rem] xl:gap-6"
+    >
       <a
         href="/"
         class="flex shrink-0 items-center gap-3 transition-opacity hover:opacity-80 sm:gap-3.5"
@@ -26,13 +28,13 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
           alt={SITE.name}
           width="198"
           height="11"
-          class="w-[8.5rem] sm:w-[10.25rem] lg:w-[11.5rem]"
+          class="w-[8.5rem] sm:w-[10.25rem] lg:w-[9rem] xl:w-[11.5rem]"
           fetchpriority="high"
         />
       </a>
 
       <nav aria-label="Primary" class="hidden lg:block">
-        <ul class="flex items-center gap-x-9">
+        <ul class="flex items-center" style="gap:clamp(0.85rem,2.1vw,2.25rem)">
           {
             NAV_PRIMARY.map((item) => (
               <li>
@@ -49,7 +51,7 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
         </ul>
       </nav>
 
-      <div class="hidden items-center gap-x-7 lg:flex">
+      <div class="hidden items-center lg:flex" style="gap:clamp(1.1rem,1.7vw,1.75rem)">
         <a href={NAV_ACTIONS[0].href} class="nav-link">{NAV_ACTIONS[0].label}</a>
         <a
           href={NAV_ACTIONS[1].href}

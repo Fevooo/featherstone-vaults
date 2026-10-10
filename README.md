@@ -197,6 +197,24 @@ button colours. It is used once on the homepage, deliberately.
 
 ---
 
+## Consignment terms
+
+`/consignments` is the primary commercial page and carries `Service` and
+`FAQPage` structured data. The commercial figures live in a single `TERMS`
+object at the top of `src/pages/consignments.astro`:
+
+| Key | Fill in with | Shown where |
+| --- | --- | --- |
+| `commission` | e.g. `'15 per cent'` or `'between 10 and 20 per cent by value'` | "What it costs" and the first FAQ answer |
+| `settlement` | e.g. `'within 14 days of cleared funds'` | Stage 5, "Settlement" |
+| `minimumValue` | e.g. `'£1,000'` | An extra paragraph under "What it costs" |
+
+Leave a key `undefined` and the page falls back to honest "agreed per object"
+wording rather than printing a number nobody has committed to. Filling
+`commission` in particular is worth doing: "what does consignment cost" is the
+question owners search for, and a page that will not answer it converts and
+ranks worse than one that does.
+
 ## Forms
 
 Four forms post to `/api/enquiry`, handled by the Netlify Function in

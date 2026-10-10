@@ -20,8 +20,9 @@ export const SITE = {
 export const NAV_PRIMARY = [
   { label: 'Objects', href: '/objects' },
   { label: 'Collections', href: '/collections' },
-  { label: 'Journal', href: '/journal' },
+  { label: 'Consignment', href: '/consignments' },
   { label: 'Private Sourcing', href: '/private-acquisitions' },
+  { label: 'Journal', href: '/journal' },
   { label: 'About', href: '/about' },
 ] as const;
 
@@ -47,9 +48,9 @@ export const FOOTER_NAV = [
   {
     heading: 'Services',
     links: [
-      { label: 'Private Acquisitions', href: '/private-acquisitions' },
+      { label: 'Consignment', href: '/consignments' },
       { label: 'Sell an Object', href: '/sell-an-object' },
-      { label: 'Consignments', href: '/consignments' },
+      { label: 'Private Acquisitions', href: '/private-acquisitions' },
       { label: 'Private Access', href: '/private-access' },
     ],
   },
