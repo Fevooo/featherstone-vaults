@@ -191,12 +191,15 @@ const { formName, fields, submitLabel, checkboxes, note, id = 'enquiry-form' } =
           status.textContent =
             payload.message ??
             'Thank you. Your enquiry has been received and will be answered personally.';
+        } else if (response.status >= 500) {
+          /* Our fault, not theirs: hand them the prefilled email. The server's
+             own wording names the address for anyone without JavaScript, so
+             the lead-in here is kept short to read well before the link. */
+          showFallback(form, status, 'This enquiry could not be sent from the site.');
         } else {
-          showFallback(
-            form,
-            status,
-            payload.message ?? 'This enquiry could not be sent from the site.',
-          );
+          /* A validation problem. Offering an email escape hatch here would
+             just teach them to give up on a field they can fix. */
+          status.textContent = payload.message ?? 'Please check the form and try again.';
         }
       } catch {
         showFallback(form, status, 'This enquiry could not be sent from the site.');

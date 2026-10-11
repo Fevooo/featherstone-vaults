@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Form definitions</title>
+  </head>
+  <body>
+    <!--
+      Netlify form declarations.
+
+      Netlify discovers forms by parsing the deployed HTML at build time. The
+      real forms on the site are submitted with fetch() to /api/enquiry, so the
+      build bot never sees them as submittable forms. This file declares them
+      instead: it is the publish directory's record of which form names exist
+      and which fields each one carries.
+
+      The enquiry function forwards submissions here, so every enquiry is
+      recorded in Netlify even when no email provider is configured. Fields not
+      declared below are discarded by Netlify, so a new field on a form must be
+      added here too.
+
+      Nothing links to this page and it is noindex. Do not add styling or copy;
+      it is machinery, not a page.
+    -->
+    <form name="general-enquiry" data-netlify="true" data-netlify-honeypot="_confirm" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="object" />
+      <input type="text" name="interest" />
+      <textarea name="message"></textarea>
+      <input type="text" name="_confirm" />
+    </form>
+
+    <form name="sell-an-object" data-netlify="true" data-netlify-honeypot="_confirm" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="objectType" />
+      <input type="text" name="value" />
+      <textarea name="description"></textarea>
+      <textarea name="provenance"></textarea>
+      <textarea name="photographs"></textarea>
+      <input type="text" name="_confirm" />
+    </form>
+
+    <form name="private-acquisition" data-netlify="true" data-netlify-honeypot="_confirm" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="interest" />
+      <input type="text" name="budget" />
+      <textarea name="object"></textarea>
+      <textarea name="notes"></textarea>
+      <input type="text" name="_confirm" />
+    </form>
+
+    <form name="private-access" data-netlify="true" data-netlify-honeypot="_confirm" hidden>
+      <input type="text" name="firstName" />
+      <input type="text" name="surname" />
+      <input type="email" name="email" />
+      <input type="text" name="range" />
+      <input type="checkbox" name="interests" />
+      <input type="text" name="_confirm" />
+    </form>
+  </body>
+</html>

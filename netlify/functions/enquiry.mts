@@ -3,28 +3,34 @@ import type { Config, Context } from '@netlify/functions'
 /**
  * Enquiry handler.
  *
- * Receives the site's four forms, validates them and forwards the contents by
- * email. Nothing is stored.
+ * Receives the site's four forms, validates them, and delivers them by two
+ * independent channels so that a lead cannot be lost to a missing setting:
  *
- * Only one environment variable is required:
+ *   1. Netlify Forms. Every submission is recorded against the site. Needs no
+ *      API key and no DNS, and the record survives whatever happens to email.
+ *   2. Email, via Resend, when RESEND_API_KEY is set. This is the one that
+ *      lands in the enquiries@ inbox with reply_to pointing at the enquirer,
+ *      so a reply goes straight back to them.
  *
- *   RESEND_API_KEY   API key for resend.com
+ * Either channel succeeding counts as delivered. Only if both fail does the
+ * caller get an error, and the form then offers a prefilled mailto.
  *
- * Two are optional and default sensibly:
+ * Environment variables, all optional:
  *
- *   ENQUIRY_TO       Defaults to enquiries@featherstonevaults.com. Every form
- *                    on the site delivers here.
- *   ENQUIRY_FROM     Defaults to website@featherstonevaults.com. This is a
- *                    sending identity, not a mailbox: it needs the domain
- *                    verified in Resend, but no inbox has to exist for it.
- *                    Replies go to the enquirer via reply_to, not here.
- *
- * Until the key is set the endpoint returns a clear 503 and the form falls
- * back to a prefilled mailto, so an enquiry is never silently swallowed.
+ *   RESEND_API_KEY   Enables channel 2. Without it the enquiry is still
+ *                    recorded by channel 1.
+ *   ENQUIRY_TO       Defaults to enquiries@featherstonevaults.com.
+ *   ENQUIRY_FROM     Defaults to website@featherstonevaults.com. A sending
+ *                    identity, not a mailbox: the domain must be verified in
+ *                    Resend, but no inbox has to exist for it. Replies go to
+ *                    the enquirer via reply_to, not here.
  */
 
 const DEFAULT_TO = 'enquiries@featherstonevaults.com'
 const DEFAULT_FROM = 'Featherstone Vaults <website@featherstonevaults.com>'
+
+/** Declared in public/__forms.html, which is how Netlify learns the schema. */
+const FORMS_PATH = '/__forms.html'
 
 const FORM_TITLES: Record<string, string> = {
   'general-enquiry': 'General enquiry',
@@ -52,6 +58,9 @@ const FIELD_LABELS: Record<string, string> = {
   message: 'Message',
 }
 
+/** Submitted alongside the real fields; never part of the enquiry itself. */
+const CONTROL_FIELDS = new Set(['form', 'form-name', '_confirm'])
+
 const json = (status: number, message: string) =>
   new Response(JSON.stringify({ message }), {
     status,
@@ -66,6 +75,60 @@ const escapeHtml = (value: string) =>
     /[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
   )
+
+/**
+ * Records the submission against the site's Netlify form of the same name.
+ *
+ * Netlify detects forms by parsing deployed HTML, so the raw field names are
+ * posted here rather than the display labels used in the email. Failure is
+ * reported, never thrown: this is one of two channels and must not take the
+ * other one down with it.
+ */
+async function recordSubmission(
+  origin: string,
+  formName: string,
+  form: FormData,
+): Promise<boolean> {
+  if (!FORM_TITLES[formName]) return false
+
+  const body = new URLSearchParams()
+  body.set('form-name', formName)
+  for (const [key, value] of form.entries()) {
+    if (CONTROL_FIELDS.has(key)) continue
+    const text = String(value).trim()
+    if (text) body.append(key, text)
+  }
+
+  try {
+    const response = await fetch(`${origin}${FORMS_PATH}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body,
+      signal: AbortSignal.timeout(6000),
+    })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+/** Sends the enquiry to the house inbox. Reports failure rather than throwing. */
+async function sendEmail(payload: Record<string, unknown>, apiKey: string): Promise<boolean> {
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(8000),
+    })
+    return response.ok
+  } catch {
+    return false
+  }
+}
 
 export default async (request: Request, _context: Context) => {
   if (request.method !== 'POST') {
@@ -94,7 +157,7 @@ export default async (request: Request, _context: Context) => {
   /* Collect the submitted fields, keeping multi-value inputs together. */
   const entries: Array<[string, string]> = []
   for (const key of new Set(form.keys())) {
-    if (key === 'form' || key === '_confirm') continue
+    if (CONTROL_FIELDS.has(key)) continue
     const values = form
       .getAll(key)
       .map((v) => String(v).trim())
@@ -124,38 +187,27 @@ export default async (request: Request, _context: Context) => {
   const apiKey = process.env.RESEND_API_KEY
   const to = process.env.ENQUIRY_TO?.trim() || DEFAULT_TO
   const from = process.env.ENQUIRY_FROM?.trim() || DEFAULT_FROM
+  const origin = process.env.URL?.trim().replace(/\/$/, '') || new URL(request.url).origin
 
-  if (!apiKey) {
-    return json(
-      503,
-      `Enquiries by form are not yet connected. Please write to ${DEFAULT_TO} and we will reply directly.`,
-    )
+  /* Both channels at once: neither waits on the other, and either will do. */
+  const [recorded, emailed] = await Promise.all([
+    recordSubmission(origin, formName, form),
+    apiKey
+      ? sendEmail(
+          { from, to: [to], reply_to: email, subject: `[FV] ${title}`, text, html },
+          apiKey,
+        )
+      : Promise.resolve(false),
+  ])
+
+  if (emailed || recorded) {
+    return json(200, 'Thank you. Your enquiry has been received and will be answered personally.')
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${apiKey}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      reply_to: email,
-      subject: `[FV] ${title}`,
-      text,
-      html,
-    }),
-  })
-
-  if (!response.ok) {
-    return json(
-      502,
-      'That enquiry could not be sent. Please write to enquiries@featherstonevaults.com and we will reply directly.',
-    )
-  }
-
-  return json(200, 'Thank you. Your enquiry has been received and will be answered personally.')
+  return json(
+    apiKey ? 502 : 503,
+    `That enquiry could not be sent from the site. Please write to ${DEFAULT_TO} and we will reply directly.`,
+  )
 }
 
 /* Keeps the public endpoint at /api/enquiry, so the forms need no change. */

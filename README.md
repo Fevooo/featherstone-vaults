@@ -118,9 +118,14 @@ public/
   fonts/          self-hosted woff2, latin subset
   og/             social card
   _headers        hosting cache and security headers
+  __forms.html    Netlify form declarations (see "Forms" below)
   robots.txt
-functions/
-  api/enquiry.ts  serverless form handler
+netlify/
+  functions/
+    enquiry.mts   form handler, routed at /api/enquiry by config.path
+scripts/
+  verify-forms.mjs  build check: form fields match their declaration
+  indexnow.mjs
 src/
   components/     Plate, ObjectTile, CollectionPanel, SectionHead, forms, SEO
   content/
@@ -227,14 +232,41 @@ submit in place.
 **Every form delivers to `enquiries@featherstonevaults.com`.** That is the
 default in the function; nothing needs configuring for the destination.
 
-### Connecting it
+### Two delivery channels
 
-One environment variable is required, in Netlify under
-Site configuration → Environment variables:
+The handler attempts both at once, and either one succeeding counts as
+delivered. One needs no setup at all; the other is the one worth having.
+
+**1. Netlify Forms — no API key, no DNS.** Every submission is recorded against
+the site and appears under Forms in the Netlify dashboard. `public/__forms.html`
+declares each form and its fields, which is how Netlify learns the schema: the
+real forms submit by `fetch`, so the build bot never sees them. Netlify
+**silently discards fields it was not told about**, so `scripts/verify-forms.mjs`
+runs at the end of every build and fails it if a form gains a field the
+declaration lacks. Add a field to a form, add it to `__forms.html`.
+
+**2. Resend email — when `RESEND_API_KEY` is set.** This is the channel that
+matters commercially. The enquiry arrives in the enquiries@ inbox, from the
+house domain, subject prefixed `[FV]`, with `reply_to` set to the enquirer, so
+hitting reply answers them directly. Netlify's own notification emails come
+from Netlify and cannot do that.
+
+If both channels fail, the form replaces the submit message with a `mailto:`
+link prefilled with everything the sender typed. A lead is never dropped on the
+floor. There is a honeypot field and a 5,000-character cap on the way in.
+
+### Setting it up
+
+**Step one, no DNS involved.** In Netlify: Forms → enable form detection, then
+redeploy so the declarations are parsed. Add an email notification pointing at
+enquiries@. From then on every enquiry is recorded and notified.
+
+**Step two, recommended.** Create a Resend account, verify a sending domain,
+and add the key under Site configuration → Environment variables:
 
 | Variable | Required | Default |
 | --- | --- | --- |
-| `RESEND_API_KEY` | yes | none |
+| `RESEND_API_KEY` | no, but wanted | none |
 | `ENQUIRY_TO` | no | `enquiries@featherstonevaults.com` |
 | `ENQUIRY_FROM` | no | `Featherstone Vaults <website@featherstonevaults.com>` |
 
@@ -244,26 +276,30 @@ the enquirer through `reply_to`, not back to the sender.
 
 ### DNS, and a conflict to avoid
 
-Resend verification adds a DKIM record and an SPF entry. Two cautions for this
-domain specifically:
-
-- There can only be one SPF `TXT` record at the root. The existing record is
-  `v=spf1 include:_spf.mx.cloudflare.net ~all`; a second one must be *merged*
-  into it, not added alongside, or both break.
-- Safer still, verify a sending subdomain such as `send.featherstonevaults.com`
-  in Resend. SPF and DKIM then live on the subdomain and the root records,
-  including the `MX` that delivers inbound mail, are left untouched.
-
 Sending and receiving are separate. Setting Resend up does not change where
-inbound mail to `enquiries@` is delivered.
+inbound mail to `enquiries@` is delivered, and nothing about the forms requires
+the inbound setup to change.
 
-### If it is not connected
+Verify **`send.featherstonevaults.com`**, not the root domain. Resend then puts
+its SPF and DKIM records on that subdomain and the root is untouched. That
+matters here for two reasons:
 
-The endpoint returns a clear 503 and the form replaces the submit message with
-a `mailto:` link prefilled with everything the sender typed, addressed to
-`enquiries@featherstonevaults.com`. The same happens if Resend errors. A lead
-is never dropped on the floor, and there is a honeypot field plus a length cap
-on the way in. Nothing is stored anywhere.
+- A domain can have only one SPF `TXT` record at the root. The existing one is
+  `v=spf1 include:_spf.mx.cloudflare.net ~all`; a second must be *merged* into
+  it, not added alongside, or both break.
+- The root `MX` currently points at Microsoft
+  (`featherstonevaults-com.mail.protection.outlook.com`), which is what delivers
+  enquiries@. Cloudflare Email Routing wants to replace it with its own `MX`
+  records. **Do not add them.** A domain has one mail host; running both makes
+  inbound delivery unpredictable. Cloudflare Email Routing also only forwards,
+  so it cannot send the form email and is not an alternative to Resend.
+
+### Known rough edge
+
+With JavaScript disabled the form does a native POST and the browser renders
+the handler's JSON response rather than a styled confirmation. Rare, and no
+enquiry is lost, but a `/thank-you` page and a `303` redirect for non-`fetch`
+submissions would close it.
 
 ## Deployment
 
