@@ -601,6 +601,17 @@
     outline-color: var(--color-bronze-deep);
   }
 
+  /* --- Department banner ------------------------------------------ */
+  /* The plate sets an aspect ratio, which on a wide screen makes a full
+     width banner tall enough to swallow the first screenful. Cap it so the
+     banner stays an accent and the catalogue stays above the fold. */
+  .plate-banner {
+    /* width must be pinned, or aspect-ratio shrinks the box to keep the
+       ratio instead of letting object-cover crop it. */
+    width: 100%;
+    max-height: clamp(11rem, 28vh, 21rem);
+  }
+
   /* --- Link that covers a whole panel ----------------------------- */
   .stretch::after {
     content: '';

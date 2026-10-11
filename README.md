@@ -217,25 +217,53 @@ ranks worse than one that does.
 
 ## Forms
 
-Four forms post to `/api/enquiry`, handled by the Netlify Function in
+Four forms (enquiry, sell an object, private acquisitions, private access) post
+to `/api/enquiry`, handled by the Netlify Function in
 `netlify/functions/enquiry.mts`. The function pins its own route with
 `config.path`, so the endpoint does not depend on a redirect rule. The forms
 work without JavaScript (native form POST) and are progressively enhanced to
 submit in place.
 
-Set these with the active hosting provider to make them deliver:
+**Every form delivers to `enquiries@featherstonevaults.com`.** That is the
+default in the function; nothing needs configuring for the destination.
 
-| Variable | Value |
-| --- | --- |
-| `RESEND_API_KEY` | API key from resend.com |
-| `ENQUIRY_TO` | where enquiries are delivered |
-| `ENQUIRY_FROM` | a verified sender on the domain |
+### Connecting it
 
-Until they are set the endpoint returns a clear message directing the sender to
-email instead, so an enquiry is never silently swallowed. There is a honeypot
-field and a length cap; no data is stored anywhere.
+One environment variable is required, in Netlify under
+Site configuration → Environment variables:
 
----
+| Variable | Required | Default |
+| --- | --- | --- |
+| `RESEND_API_KEY` | yes | none |
+| `ENQUIRY_TO` | no | `enquiries@featherstonevaults.com` |
+| `ENQUIRY_FROM` | no | `Featherstone Vaults <website@featherstonevaults.com>` |
+
+`ENQUIRY_FROM` is a sending identity, not a mailbox. The domain has to be
+verified in Resend, but no inbox needs to exist at that address: replies go to
+the enquirer through `reply_to`, not back to the sender.
+
+### DNS, and a conflict to avoid
+
+Resend verification adds a DKIM record and an SPF entry. Two cautions for this
+domain specifically:
+
+- There can only be one SPF `TXT` record at the root. The existing record is
+  `v=spf1 include:_spf.mx.cloudflare.net ~all`; a second one must be *merged*
+  into it, not added alongside, or both break.
+- Safer still, verify a sending subdomain such as `send.featherstonevaults.com`
+  in Resend. SPF and DKIM then live on the subdomain and the root records,
+  including the `MX` that delivers inbound mail, are left untouched.
+
+Sending and receiving are separate. Setting Resend up does not change where
+inbound mail to `enquiries@` is delivered.
+
+### If it is not connected
+
+The endpoint returns a clear 503 and the form replaces the submit message with
+a `mailto:` link prefilled with everything the sender typed, addressed to
+`enquiries@featherstonevaults.com`. The same happens if Resend errors. A lead
+is never dropped on the floor, and there is a honeypot field plus a length cap
+on the way in. Nothing is stored anywhere.
 
 ## Deployment
 

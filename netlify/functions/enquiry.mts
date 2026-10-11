@@ -6,15 +6,25 @@ import type { Config, Context } from '@netlify/functions'
  * Receives the site's four forms, validates them and forwards the contents by
  * email. Nothing is stored.
  *
- * Required environment variables (Netlify → Site configuration → Environment
- * variables). Until they are set the endpoint replies with a clear message
- * telling the sender to write in directly, so the site never silently
- * swallows an enquiry.
+ * Only one environment variable is required:
  *
  *   RESEND_API_KEY   API key for resend.com
- *   ENQUIRY_TO       Address enquiries are delivered to
- *   ENQUIRY_FROM     Verified sender, e.g. "site@featherstonevaults.com"
+ *
+ * Two are optional and default sensibly:
+ *
+ *   ENQUIRY_TO       Defaults to enquiries@featherstonevaults.com. Every form
+ *                    on the site delivers here.
+ *   ENQUIRY_FROM     Defaults to website@featherstonevaults.com. This is a
+ *                    sending identity, not a mailbox: it needs the domain
+ *                    verified in Resend, but no inbox has to exist for it.
+ *                    Replies go to the enquirer via reply_to, not here.
+ *
+ * Until the key is set the endpoint returns a clear 503 and the form falls
+ * back to a prefilled mailto, so an enquiry is never silently swallowed.
  */
+
+const DEFAULT_TO = 'enquiries@featherstonevaults.com'
+const DEFAULT_FROM = 'Featherstone Vaults <website@featherstonevaults.com>'
 
 const FORM_TITLES: Record<string, string> = {
   'general-enquiry': 'General enquiry',
@@ -112,13 +122,13 @@ export default async (request: Request, _context: Context) => {
     .join('')}`
 
   const apiKey = process.env.RESEND_API_KEY
-  const to = process.env.ENQUIRY_TO
-  const from = process.env.ENQUIRY_FROM
+  const to = process.env.ENQUIRY_TO?.trim() || DEFAULT_TO
+  const from = process.env.ENQUIRY_FROM?.trim() || DEFAULT_FROM
 
-  if (!apiKey || !to || !from) {
+  if (!apiKey) {
     return json(
       503,
-      'Enquiries by form are not yet connected. Please write to enquiries@featherstonevaults.com and we will reply directly.',
+      `Enquiries by form are not yet connected. Please write to ${DEFAULT_TO} and we will reply directly.`,
     )
   }
 
@@ -132,7 +142,7 @@ export default async (request: Request, _context: Context) => {
       from,
       to: [to],
       reply_to: email,
-      subject: `${title}, featherstonevaults.com`,
+      subject: `[FV] ${title}`,
       text,
       html,
     }),

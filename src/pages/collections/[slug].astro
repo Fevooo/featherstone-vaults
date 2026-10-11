@@ -78,14 +78,14 @@ const plateImage = image ?? remoteImage;
   <div class="shell">
     {
       plateImage && (
-        <figure class="mb-16 md:mb-20">
+        <figure class="mb-14 md:mb-16">
           <Plate
             ratio="21 / 9"
             image={plateImage}
             alt={imageAlt ?? ''}
             loading="eager"
             sizes="(min-width: 1536px) 1440px, 100vw"
-            class="bg-charcoal [&_img]:scale-[1.01] [&_img]:opacity-[0.88] [&_img]:brightness-[0.72] [&_img]:contrast-[1.10] [&_img]:saturate-[0.68] [&_img]:grayscale-[0.12]"
+            class="plate-banner bg-charcoal [&_img]:scale-[1.01] [&_img]:opacity-[0.88] [&_img]:brightness-[0.72] [&_img]:contrast-[1.10] [&_img]:saturate-[0.68] [&_img]:grayscale-[0.12]"
           />
           {imageCredit && (
             <figcaption class="label-sm mt-3 text-ash">

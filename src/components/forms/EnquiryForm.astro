@@ -108,10 +108,63 @@ const { formName, fields, submitLabel, checkboxes, note, id = 'enquiry-form' } =
 </form>
 
 <script>
+  const ENQUIRY_EMAIL = 'enquiries@featherstonevaults.com';
+
+  const FIELD_LABELS: Record<string, string> = {
+    name: 'Name',
+    firstName: 'First name',
+    surname: 'Surname',
+    email: 'Email',
+    object: 'Object',
+    objectType: 'Object type',
+    interest: 'Area of interest',
+    interests: 'Collector interests',
+    budget: 'Approximate budget',
+    range: 'Acquisition range',
+    value: 'Approximate value',
+    description: 'Description',
+    provenance: 'Known provenance',
+    photographs: 'Photographs',
+    notes: 'Notes',
+    message: 'Message',
+  };
+
+  /**
+   * If the endpoint is unreachable or not yet connected, hand the sender a
+   * prefilled email instead of a dead end. A consignment lead is worth more
+   * than the tidiness of the form.
+   */
+  function mailtoFor(form: HTMLFormElement): string {
+    const data = new FormData(form);
+    const formName = String(data.get('form') ?? 'enquiry');
+    const lines: string[] = [];
+    for (const key of new Set(data.keys())) {
+      if (key === 'form' || key === '_confirm') continue;
+      const values = data
+        .getAll(key)
+        .map((v) => String(v).trim())
+        .filter(Boolean);
+      if (!values.length) continue;
+      lines.push(`${FIELD_LABELS[key] ?? key}: ${values.join(', ')}`);
+    }
+    const subject = `Enquiry via featherstonevaults.com (${formName})`;
+    return `mailto:${ENQUIRY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n\n'))}`;
+  }
+
+  function showFallback(form: HTMLFormElement, status: HTMLElement, message: string) {
+    status.textContent = `${message} `;
+    const link = document.createElement('a');
+    link.href = mailtoFor(form);
+    link.textContent = `Send it by email instead`;
+    link.className =
+      'border-b border-[var(--line-bronze)] text-parchment transition-colors hover:border-bronze-lit hover:text-ivory';
+    status.appendChild(link);
+    status.append('. Nothing you typed is lost.');
+  }
+
   document.querySelectorAll<HTMLFormElement>('[data-enquiry-form]').forEach((form) => {
     const status = form.querySelector<HTMLElement>('[data-form-status]');
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-    const original = status?.textContent ?? '';
 
     form.addEventListener('submit', async (event) => {
       if (!form.reportValidity()) {
@@ -131,26 +184,25 @@ const { formName, fields, submitLabel, checkboxes, note, id = 'enquiry-form' } =
           headers: { Accept: 'application/json' },
           body: new FormData(form),
         });
-        const payload = await response.json().catch(() => ({}) as Record<string, string>);
+        const payload = (await response.json().catch(() => ({}))) as Record<string, string>;
 
         if (response.ok) {
           form.reset();
           status.textContent =
-            payload.message ?? 'Thank you. Your enquiry has been received and will be answered personally.';
-        } else {
-          status.textContent =
             payload.message ??
-            'This enquiry could not be sent. Please write to enquiries@featherstonevaults.com and we will reply directly.';
+            'Thank you. Your enquiry has been received and will be answered personally.';
+        } else {
+          showFallback(
+            form,
+            status,
+            payload.message ?? 'This enquiry could not be sent from the site.',
+          );
         }
       } catch {
-        status.textContent =
-          'This enquiry could not be sent. Please write to enquiries@featherstonevaults.com and we will reply directly.';
+        showFallback(form, status, 'This enquiry could not be sent from the site.');
       } finally {
         button.disabled = false;
         button.style.opacity = '';
-        window.setTimeout(() => {
-          if (status.textContent !== original) return;
-        }, 0);
       }
     });
   });
