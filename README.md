@@ -237,7 +237,7 @@ default in the function; nothing needs configuring for the destination.
 The handler attempts both at once, and either one succeeding counts as
 delivered. One needs no setup at all; the other is the one worth having.
 
-**1. Netlify Forms — no API key, no DNS.** Every submission is recorded against
+**1. Netlify Forms: no API key, no DNS.** Every submission is recorded against
 the site and appears under Forms in the Netlify dashboard. `public/__forms.html`
 declares each form and its fields, which is how Netlify learns the schema: the
 real forms submit by `fetch`, so the build bot never sees them. Netlify
@@ -245,7 +245,7 @@ real forms submit by `fetch`, so the build bot never sees them. Netlify
 runs at the end of every build and fails it if a form gains a field the
 declaration lacks. Add a field to a form, add it to `__forms.html`.
 
-**2. Resend email — when `RESEND_API_KEY` is set.** This is the channel that
+**2. Resend email, when `RESEND_API_KEY` is set.** This is the channel that
 matters commercially. The enquiry arrives in the enquiries@ inbox, from the
 house domain, subject prefixed `[FV]`, with `reply_to` set to the enquirer, so
 hitting reply answers them directly. Netlify's own notification emails come
