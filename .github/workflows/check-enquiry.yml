@@ -1,19 +1,21 @@
 name: Check enquiry forms
 
-# A manual end-to-end check that the live enquiry endpoint is actually
-# delivering. Run it from the Actions tab after changing anything about the
-# forms, the Resend key or the Netlify form settings.
+# A manual end-to-end check that the live enquiry endpoint is delivering. Run
+# it from the Actions tab after changing anything about the forms, the Resend
+# key or the Netlify form settings.
 #
-# The endpoint returns 200 if either delivery channel accepted the enquiry, so
-# a single probe cannot say which one did. This sends two:
+# The endpoint returns 200 if *either* delivery channel accepted the enquiry,
+# so one probe through it cannot say which. Each channel is therefore tested on
+# its own:
 #
-#   A. A real form name, so both channels are tried.
-#   B. An unrecognised form name. The handler skips the Netlify channel for
-#      those, so this isolates Resend.
+#   1. Netlify Forms, by posting to /__forms.html exactly as the handler does.
+#   2. Resend, by posting to /api/enquiry under an unrecognised form name. The
+#      handler skips the Netlify channel for those, leaving email as the only
+#      way a 200 can come back.
 #
-# Comparing them identifies the failing channel exactly. Both arrive in the
-# house inbox when everything works, marked as self-tests, so this is manual
-# dispatch only and should not be put on a schedule.
+# A healthy run therefore puts one test email in the house inbox and one test
+# submission in Netlify, both marked as self-tests. Manual dispatch only; do
+# not put this on a schedule.
 
 on:
   workflow_dispatch:
@@ -25,30 +27,13 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe the live endpoint
+      - name: Probe each delivery channel
         env:
           SITE_ORIGIN: https://featherstonevaults.com
         run: |
           node <<'NODE'
           const origin = process.env.SITE_ORIGIN
-
-          async function probe(label, formName) {
-            const body = new URLSearchParams({
-              form: formName,
-              name: 'Automated site check',
-              email: 'site-selftest@featherstonevaults.com',
-              message:
-                `Automated check (${label}) of the enquiry endpoint, sent from GitHub Actions. ` +
-                'No reply is needed.',
-            })
-            const response = await fetch(`${origin}/api/enquiry`, {
-              method: 'POST',
-              headers: { 'content-type': 'application/x-www-form-urlencoded' },
-              body,
-            })
-            console.log(`  ${label.padEnd(22)} ${response.status}  ${(await response.text()).trim()}`)
-            return response.status
-          }
+          const NOTE = 'Automated check from GitHub Actions. No reply is needed.'
 
           async function main() {
             const marker = await fetch(`${origin}/build.txt`, { cache: 'no-store' })
@@ -57,38 +42,65 @@ jobs:
             const declarations = await fetch(`${origin}/__forms.html`, { cache: 'no-store' })
             console.log(`/__forms.html          ${declarations.status}`)
             console.log('')
-
             console.log('probes')
-            const both = await probe('both channels', 'general-enquiry')
-            const resendOnly = await probe('resend only', '__probe-unregistered')
+
+            /* 1. The Netlify channel, driven exactly as the handler drives it.
+                  A 404 or 405 here means form detection is off, or the site has
+                  not been redeployed since it was switched on. */
+            const netlify = await fetch(`${origin}/__forms.html`, {
+              method: 'POST',
+              headers: { 'content-type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({
+                'form-name': 'general-enquiry',
+                name: 'Automated site check',
+                email: 'site-selftest@featherstonevaults.com',
+                message: NOTE,
+              }),
+            })
+            console.log(`  netlify forms        ${netlify.status}`)
+
+            /* 2. Resend in isolation: an unrecognised form name means the
+                  handler never touches the Netlify channel, so only email can
+                  produce a 200. */
+            const resend = await fetch(`${origin}/api/enquiry`, {
+              method: 'POST',
+              headers: { 'content-type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({
+                form: '__probe-unregistered',
+                name: 'Automated site check',
+                email: 'site-selftest@featherstonevaults.com',
+                message: NOTE,
+              }),
+            })
+            const resendBody = (await resend.text()).trim()
+            console.log(`  resend email         ${resend.status}  ${resendBody}`)
             console.log('')
 
-            /* Resend is the only channel the second probe can have used. */
-            const resendWorks = resendOnly === 200
-            const somethingWorks = both === 200
-            /* If the pair disagree, the first probe was carried by Netlify. */
-            const netlifyWorks = somethingWorks && !resendWorks
+            const netlifyWorks = netlify.ok
+            const resendWorks = resend.status === 200
 
             console.log(`Resend email       ${resendWorks ? 'WORKING' : 'NOT WORKING'}`)
-            console.log(`Netlify Forms      ${netlifyWorks ? 'WORKING' : resendWorks ? 'UNKNOWN (Resend answered first)' : 'NOT WORKING'}`)
+            console.log(`Netlify Forms      ${netlifyWorks ? 'WORKING' : 'NOT WORKING'}`)
             console.log('')
 
             if (resendWorks && netlifyWorks) {
-              console.log('Both channels are live.')
-            } else if (resendWorks) {
-              console.log('Email is being delivered. Check Netlify > Forms for a recorded')
-              console.log('submission to confirm the backup channel; nothing is broken if it is missing,')
-              console.log('but enquiries would then have no durable record.')
-            } else if (netlifyWorks) {
-              console.log('Enquiries are being recorded but NOT emailed. Resend is refusing the send:')
-              console.log('see Netlify > Logs > Functions > enquiry for the reason. Most often the')
-              console.log('sender address is not on a domain verified in Resend.')
-              process.exitCode = 1
-            } else {
-              console.log('Nothing is delivering. The endpoint is reachable but both channels failed.')
-              console.log(`Status ${both} on the real form name: ${both === 503 ? 'no API key is reaching the function.' : 'the key is set but Resend refused.'}`)
-              process.exitCode = 1
+              console.log('Both channels live. Enquiries are emailed and recorded.')
+              return
             }
+            if (resendWorks) {
+              console.log('Enquiries are emailed but not recorded. No lead is at risk, but there is')
+              console.log('no durable record and no backup if the key lapses. Turn on form detection')
+              console.log('in Netlify (Site configuration > Forms) and redeploy.')
+            } else if (netlifyWorks) {
+              console.log('Enquiries are recorded but NOT emailed, so nothing reaches the inbox')
+              console.log('unless a Netlify form notification is configured. Resend is refusing the')
+              console.log('send: see Netlify > Logs > Functions > enquiry. Most often the sender is')
+              console.log('not on a domain verified in Resend.')
+            } else {
+              console.log('Neither channel is delivering.')
+              console.log(resend.status === 503 ? 'No API key is reaching the function.' : 'The key is set but Resend refused the send.')
+            }
+            process.exitCode = 1
           }
 
           main().catch((error) => {
