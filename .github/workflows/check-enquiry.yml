@@ -1,0 +1,92 @@
+name: Check enquiry forms
+
+# A manual end-to-end check that the live enquiry endpoint is actually
+# delivering. Run it from the Actions tab after changing anything about the
+# forms, the Resend key or the Netlify form settings.
+#
+# It sends one real enquiry to enquiries@featherstonevaults.com, clearly
+# marked as a self-test, so do not run it on a loop. It is deliberately
+# manual-only for that reason.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe the live endpoint
+        env:
+          SITE_ORIGIN: https://featherstonevaults.com
+        run: |
+          node <<'NODE'
+          const origin = process.env.SITE_ORIGIN
+          const problems = []
+
+          async function main() {
+            /* 1. Which build is live. */
+            const marker = await fetch(`${origin}/build.txt`, { cache: 'no-store' })
+            console.log(`live commit        ${marker.ok ? (await marker.text()).trim() : `unavailable (${marker.status})`}`)
+
+            /* 2. The form declarations Netlify parses to learn the schema. */
+            const declarations = await fetch(`${origin}/__forms.html`, { cache: 'no-store' })
+            console.log(`/__forms.html      ${declarations.status}`)
+            if (!declarations.ok) {
+              problems.push('__forms.html is not being served, so Netlify cannot have detected the forms.')
+            }
+
+            /* 3. A real submission, marked so it is obvious in the inbox. */
+            const body = new URLSearchParams({
+              form: 'general-enquiry',
+              name: 'Automated site check',
+              email: 'site-selftest@featherstonevaults.com',
+              message:
+                'This is an automated check of the enquiry endpoint, sent from GitHub Actions. ' +
+                'No reply is needed. If this arrived in the enquiries inbox, email delivery is working.',
+            })
+            const response = await fetch(`${origin}/api/enquiry`, {
+              method: 'POST',
+              headers: { 'content-type': 'application/x-www-form-urlencoded' },
+              body,
+            })
+            const payload = await response.text()
+            console.log(`POST /api/enquiry  ${response.status}`)
+            console.log(`response           ${payload}`)
+            console.log('')
+
+            /* The status codes map onto specific misconfigurations. */
+            if (response.status === 200) {
+              console.log('At least one delivery channel accepted the enquiry.')
+              console.log('Confirm which: check enquiries@ for the email, and Netlify > Forms for the record.')
+              console.log('A 200 with no email means Resend refused it; the reason is in the function log.')
+            } else if (response.status === 503) {
+              problems.push(
+                'Both channels are down. RESEND_API_KEY is not reaching the function, ' +
+                  'and Netlify form detection is off or the site has not been redeployed since enabling it.',
+              )
+            } else if (response.status === 502) {
+              problems.push(
+                'RESEND_API_KEY is set but Resend refused the send, and Netlify is not recording either. ' +
+                  'Usually the sender is not on a verified domain. See Netlify > Logs > Functions > enquiry.',
+              )
+            } else {
+              problems.push(`Unexpected status ${response.status}.`)
+            }
+          }
+
+          main()
+            .then(() => {
+              if (problems.length) {
+                console.error('\nProblems found:')
+                for (const p of problems) console.error(`  - ${p}`)
+                process.exit(1)
+              }
+            })
+            .catch((error) => {
+              console.error(error)
+              process.exit(1)
+            })
+          NODE
