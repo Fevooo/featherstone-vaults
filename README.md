@@ -261,18 +261,28 @@ floor. There is a honeypot field and a 5,000-character cap on the way in.
 redeploy so the declarations are parsed. Add an email notification pointing at
 enquiries@. From then on every enquiry is recorded and notified.
 
-**Step two, recommended.** Create a Resend account, verify a sending domain,
-and add the key under Site configuration → Environment variables:
+**Step two, recommended.** Create a Resend account, verify
+`send.featherstonevaults.com` as a domain, then add the key under Site
+configuration → Environment variables:
 
 | Variable | Required | Default |
 | --- | --- | --- |
 | `RESEND_API_KEY` | no, but wanted | none |
 | `ENQUIRY_TO` | no | `enquiries@featherstonevaults.com` |
-| `ENQUIRY_FROM` | no | `Featherstone Vaults <website@featherstonevaults.com>` |
+| `ENQUIRY_FROM` | no | `Featherstone Vaults <website@send.featherstonevaults.com>` |
 
-`ENQUIRY_FROM` is a sending identity, not a mailbox. The domain has to be
-verified in Resend, but no inbox needs to exist at that address: replies go to
-the enquirer through `reply_to`, not back to the sender.
+Verify that subdomain and `RESEND_API_KEY` is the only variable to set.
+
+`ENQUIRY_FROM` is a sending identity, not a mailbox. No inbox needs to exist at
+that address, and the enquirer never sees it: they receive nothing from Resend,
+and a reply reaches them through `reply_to`. **Its domain must be one verified
+in Resend**, so verifying the root domain instead of the subdomain means
+setting `ENQUIRY_FROM` to match, or every send is rejected.
+
+A rejected send is not visible from the site, because Netlify will already have
+recorded the enquiry and the form reports success. The reason is written to the
+function log instead: Netlify → Logs → Functions, filtered to `enquiry`. Look
+there first if the forms seem healthy but no email arrives.
 
 ### DNS, and a conflict to avoid
 

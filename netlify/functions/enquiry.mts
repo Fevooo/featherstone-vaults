@@ -27,7 +27,17 @@ import type { Config, Context } from '@netlify/functions'
  */
 
 const DEFAULT_TO = 'enquiries@featherstonevaults.com'
-const DEFAULT_FROM = 'Featherstone Vaults <website@featherstonevaults.com>'
+
+/**
+ * Must sit on a domain verified in Resend, or the send is rejected outright.
+ * This is the sending subdomain, because verifying it leaves the root MX and
+ * SPF, which carry the actual enquiries@ mailbox, untouched. Verify the root
+ * domain instead and this has to change with it, via ENQUIRY_FROM.
+ *
+ * Only ever seen by the house: the enquirer receives nothing from here, and a
+ * reply goes to them through reply_to.
+ */
+const DEFAULT_FROM = 'Featherstone Vaults <website@send.featherstonevaults.com>'
 
 /** Declared in public/__forms.html, which is how Netlify learns the schema. */
 const FORMS_PATH = '/__forms.html'
@@ -112,7 +122,15 @@ async function recordSubmission(
   }
 }
 
-/** Sends the enquiry to the house inbox. Reports failure rather than throwing. */
+/**
+ * Sends the enquiry to the house inbox. Reports failure rather than throwing.
+ *
+ * Failures are logged with Resend's own reason, because the other channel will
+ * usually have recorded the enquiry by now and the caller is told it succeeded.
+ * Without this line a rejected sender or a dead key would be invisible: the
+ * forms would look healthy while no email ever arrived. Netlify function logs
+ * are where to look if enquiries stop reaching the inbox.
+ */
 async function sendEmail(payload: Record<string, unknown>, apiKey: string): Promise<boolean> {
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -124,8 +142,16 @@ async function sendEmail(payload: Record<string, unknown>, apiKey: string): Prom
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(8000),
     })
+    if (!response.ok) {
+      const reason = await response.text().catch(() => '')
+      console.error(
+        `Resend rejected the enquiry (${response.status}). Sender was "${payload.from}", ` +
+          `which must be on a domain verified in Resend. ${reason}`.trim(),
+      )
+    }
     return response.ok
-  } catch {
+  } catch (error) {
+    console.error('Resend could not be reached:', error)
     return false
   }
 }
