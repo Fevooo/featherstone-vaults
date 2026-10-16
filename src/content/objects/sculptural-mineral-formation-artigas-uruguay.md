@@ -21,7 +21,7 @@ description: |-
 
   Selected for its unusual natural architecture and distinctive visual character.
 provenance:
-  - Locality reported as the Artigas region, Uruguay. No earlier collection history or supporting documentation is recorded for this specimen.
+  - From the Artigas region, Uruguay. No earlier collection history or supporting documentation is recorded for this specimen.
 condition: Presented in its natural formation, with intricate crystalline growths and an irregular mineral matrix. No major damage. The specimen has not been independently inspected.
 price: 1495
 currency: GBP
