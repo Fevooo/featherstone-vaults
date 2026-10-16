@@ -3,7 +3,7 @@ catalogueNumber: FV-MIN-002
 title: Sculptural Microcrystalline Mineral Formation, Artigas, Uruguay
 collection: natural-history
 classification: Sculptural collector’s cabinet specimen
-origin: Artigas, Uruguay (reported)
+origin: Artigas, Uruguay
 material: Unconfirmed. Possibly calcite or chalcedony, with a fine microcrystalline coating
 dimensions: 18 × 15 cm
 weight: 2.20 kg
@@ -23,11 +23,6 @@ description: |-
 provenance:
   - Locality reported as the Artigas region, Uruguay. No earlier collection history or supporting documentation is recorded for this specimen.
 condition: Presented in its natural formation, with intricate crystalline growths and an irregular mineral matrix. No major damage. The specimen has not been independently inspected.
-disclosure: >-
-  The locality and the tentative identification as calcite or chalcedony are
-  reported and have not been independently verified. The specimen has not been
-  independently inspected, and no mineralogical analysis, certificate or
-  provenance documentation is offered with it.
 price: 1495
 currency: GBP
 availability: AVAILABLE
