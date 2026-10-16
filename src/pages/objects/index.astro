@@ -51,10 +51,14 @@ const available = departments.filter((d) => present.has(d.id));
     }
 
     <h2 class="sr-only">Current catalogue</h2>
-    <p class="meta mt-6 max-w-[46rem] text-ash">
-        Catalogue plates are shown blank. Featherstone Vaults photography is in production and will
-        replace them entry by entry; no stand-in imagery is used.
-      </p>
+    {
+      objects.some((o) => o.data.images.length === 0) && (
+        <p class="meta mt-6 max-w-[46rem] text-ash">
+          Where an entry has not yet been photographed its plate is shown blank. Featherstone Vaults
+          photography replaces them entry by entry; no stand-in imagery is used.
+        </p>
+      )
+    }
 
     <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-16 md:grid-cols-3 md:gap-x-7 lg:grid-cols-4 lg:gap-x-8">
       {

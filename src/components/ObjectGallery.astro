@@ -1,0 +1,234 @@
+---
+/**
+ * ObjectGallery — the plates on an object page.
+ *
+ * The first photograph fills the main plate. When there is more than one, each
+ * angle is given its own thumbnail, and choosing one brings it into the main
+ * plate. Any plate opens a full-resolution viewer in which the photograph can
+ * be examined at its native size.
+ *
+ * Works without JavaScript: the thumbnails and the main plate are plain links
+ * to the full-resolution files, which the browser opens and zooms natively.
+ */
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import Plate from './Plate.astro';
+
+interface Props {
+  images: Array<{ src: ImageMetadata; alt: string; caption?: string }>;
+  title: string;
+}
+
+const { images, title } = Astro.props;
+
+/* Full-resolution viewing copies: native width, high quality, modern format. */
+const full = await Promise.all(
+  images.map((img) => getImage({ src: img.src, format: 'webp', quality: 90 })),
+);
+const views = images.map((img, i) => ({
+  ...img,
+  full: full[i].src,
+  label: img.caption ?? `View ${i + 1}`,
+}));
+---
+
+{
+  views.length === 0 ? (
+    <div>
+      <Plate ratio="4 / 5" tone="1" loading="eager" />
+      <p class="meta mt-4 text-ash">Object photography to follow.</p>
+    </div>
+  ) : (
+    <div data-gallery>
+      {views.map((view, i) => (
+        <figure data-gallery-slide={i} hidden={i !== 0}>
+          <a
+            href={view.full}
+            class="group block focus:outline-none"
+            data-gallery-open={i}
+            aria-label={`${view.label}. Open full-resolution photograph`}
+          >
+            <Plate
+              ratio="4 / 5"
+              tone="1"
+              image={view.src}
+              alt={view.alt}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              sizes="(min-width: 1024px) 56vw, 100vw"
+              class="cursor-zoom-in"
+            />
+          </a>
+          <figcaption class="mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <span class="label-sm text-ash">
+              {view.label}
+              {views.length > 1 && (
+                <span class="tnum ml-3 opacity-70">
+                  {i + 1} / {views.length}
+                </span>
+              )}
+            </span>
+            <a href={view.full} data-gallery-open={i} class="action-quiet">
+              View full resolution
+            </a>
+          </figcaption>
+        </figure>
+      ))}
+
+      {views.length > 1 && (
+        <ul class="mt-6 grid grid-cols-3 gap-4" aria-label={`Photographs of ${title}`}>
+          {views.map((view, i) => (
+            <li>
+              <a
+                href={view.full}
+                data-gallery-thumb={i}
+                aria-current={i === 0 ? 'true' : undefined}
+                aria-label={`Show ${view.label.toLowerCase()}`}
+                class="block outline outline-1 outline-offset-4 outline-transparent transition-[outline-color] duration-300 hover:outline-[var(--line-strong)] aria-[current=true]:outline-bronze"
+              >
+                <Plate
+                  ratio="4 / 5"
+                  tone="2"
+                  image={view.src}
+                  alt=""
+                  sizes="(min-width: 1024px) 18vw, 32vw"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <dialog
+        data-gallery-viewer
+        aria-label={`Photographs of ${title}`}
+        class="m-0 h-dvh max-h-none w-screen max-w-none bg-ink p-0 text-ivory backdrop:bg-ink"
+      >
+        <div class="flex h-full flex-col">
+          <div class="shell flex items-center justify-between gap-6 py-5">
+            <p class="label-sm text-ash" data-gallery-caption aria-live="polite" />
+            <div class="flex items-center gap-6">
+              {views.length > 1 && (
+                <>
+                  <button type="button" class="label-sm text-parchment transition-colors hover:text-ivory" data-gallery-prev>
+                    Previous
+                  </button>
+                  <button type="button" class="label-sm text-parchment transition-colors hover:text-ivory" data-gallery-next>
+                    Next
+                  </button>
+                </>
+              )}
+              <button type="button" class="label-sm text-parchment transition-colors hover:text-ivory" data-gallery-close>
+                Close
+              </button>
+            </div>
+          </div>
+          <div class="relative min-h-0 flex-1 overflow-auto" data-gallery-stage>
+            <img
+              data-gallery-image
+              alt=""
+              decoding="async"
+              class="mx-auto h-full w-full cursor-zoom-in object-contain data-[zoomed]:h-auto data-[zoomed]:w-auto data-[zoomed]:max-w-none data-[zoomed]:cursor-zoom-out"
+            />
+          </div>
+          <p class="shell meta py-4 text-ash">
+            Select the photograph to view it at full size.
+          </p>
+        </div>
+      </dialog>
+
+      <script type="application/json" data-gallery-data is:inline set:html={JSON.stringify(views.map((v) => ({ full: v.full, alt: v.alt, label: v.label })))} />
+    </div>
+  )
+}
+
+<script>
+  type View = { full: string; alt: string; label: string };
+
+  for (const gallery of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
+    const views: View[] = JSON.parse(
+      gallery.querySelector('[data-gallery-data]')?.textContent ?? '[]',
+    );
+    const slides = gallery.querySelectorAll<HTMLElement>('[data-gallery-slide]');
+    const thumbs = gallery.querySelectorAll<HTMLAnchorElement>('[data-gallery-thumb]');
+    const viewer = gallery.querySelector<HTMLDialogElement>('[data-gallery-viewer]');
+    const image = gallery.querySelector<HTMLImageElement>('[data-gallery-image]');
+    const caption = gallery.querySelector<HTMLElement>('[data-gallery-caption]');
+    const stage = gallery.querySelector<HTMLElement>('[data-gallery-stage]');
+    let current = 0;
+
+    /* Bring an angle into the main plate. */
+    const show = (index: number) => {
+      current = (index + views.length) % views.length;
+      slides.forEach((slide, i) => (slide.hidden = i !== current));
+      thumbs.forEach((thumb, i) =>
+        i === current ? thumb.setAttribute('aria-current', 'true') : thumb.removeAttribute('aria-current'),
+      );
+    };
+
+    const render = () => {
+      if (!image || !caption) return;
+      const view = views[current];
+      delete image.dataset.zoomed;
+      image.src = view.full;
+      image.alt = view.alt;
+      caption.textContent =
+        views.length > 1 ? `${view.label} · ${current + 1} / ${views.length}` : view.label;
+    };
+
+    const open = (index: number) => {
+      if (!viewer) return;
+      show(index);
+      render();
+      viewer.showModal();
+    };
+
+    thumbs.forEach((thumb, i) =>
+      thumb.addEventListener('click', (event) => {
+        event.preventDefault();
+        show(i);
+      }),
+    );
+
+    gallery.querySelectorAll<HTMLAnchorElement>('[data-gallery-open]').forEach((link) =>
+      link.addEventListener('click', (event) => {
+        if (!viewer || typeof viewer.showModal !== 'function') return;
+        event.preventDefault();
+        open(Number(link.dataset.galleryOpen));
+      }),
+    );
+
+    const step = (delta: number) => {
+      show(current + delta);
+      render();
+    };
+
+    gallery.querySelector('[data-gallery-prev]')?.addEventListener('click', () => step(-1));
+    gallery.querySelector('[data-gallery-next]')?.addEventListener('click', () => step(1));
+    gallery.querySelector('[data-gallery-close]')?.addEventListener('click', () => viewer?.close());
+
+    viewer?.addEventListener('keydown', (event) => {
+      if (views.length < 2) return;
+      if (event.key === 'ArrowLeft') step(-1);
+      if (event.key === 'ArrowRight') step(1);
+    });
+
+    /* Toggle between fitting the screen and the photograph's native size,
+       keeping the point that was selected under the pointer. */
+    image?.addEventListener('click', (event) => {
+      if (!stage) return;
+      if (image.dataset.zoomed !== undefined) {
+        delete image.dataset.zoomed;
+        return;
+      }
+      const rect = image.getBoundingClientRect();
+      const scale = Math.min(rect.width / image.naturalWidth, rect.height / image.naturalHeight);
+      const drawnW = image.naturalWidth * scale;
+      const drawnH = image.naturalHeight * scale;
+      const fx = (event.clientX - rect.left - (rect.width - drawnW) / 2) / drawnW;
+      const fy = (event.clientY - rect.top - (rect.height - drawnH) / 2) / drawnH;
+      image.dataset.zoomed = '';
+      stage.scrollLeft = Math.max(0, fx * image.naturalWidth - stage.clientWidth / 2);
+      stage.scrollTop = Math.max(0, fy * image.naturalHeight - stage.clientHeight / 2);
+    });
+  }
+</script>

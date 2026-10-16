@@ -48,6 +48,7 @@ const objectsCollection = defineCollection({
       title: z.string(),
       subtitle: z.string().optional(),
       collection: z.string(),
+      classification: z.string().optional(),
       period: z.string().optional(),
       date: z.string().optional(),
       origin: z.string().optional(),
@@ -59,6 +60,13 @@ const objectsCollection = defineCollection({
       historicalContext: z.string().optional(),
       provenance: z.array(z.string()).optional(),
       condition: z.string().optional(),
+      /** A short condition line for the metadata list, e.g. "Condition unverified". */
+      conditionSummary: z.string().optional(),
+      /**
+       * What in the entry is reported rather than verified. Shown beside the
+       * metadata so that the distinction is made before the price is read.
+       */
+      disclosure: z.string().optional(),
       literature: z.array(z.string()).optional(),
       comparativeExamples: z.array(z.string()).optional(),
       certification: z.array(z.string()).optional(),

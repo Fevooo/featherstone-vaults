@@ -121,10 +121,10 @@ const plateImage = image ?? remoteImage;
         <span class="ml-3 tnum text-ash">{String(current.length).padStart(2, '0')}</span>
       </h2>
       {
-        current.length > 0 && (
+        current.some((o) => o.data.images.length === 0) && (
           <p class="meta mt-6 max-w-[46rem] text-ash">
-            Catalogue plates are shown blank. Featherstone Vaults photography is in production and
-            will replace them entry by entry; no stand-in imagery is used.
+            Where an entry has not yet been photographed its plate is shown blank. Featherstone
+            Vaults photography replaces them entry by entry; no stand-in imagery is used.
           </p>
         )
       }

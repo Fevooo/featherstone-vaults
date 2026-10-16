@@ -2,9 +2,10 @@
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import Plate from '../../components/Plate.astro';
+import ObjectGallery from '../../components/ObjectGallery.astro';
 import ObjectTile from '../../components/ObjectTile.astro';
 import { SITE, SPECIMEN_NOTICE } from '../../consts';
+import { getImage } from 'astro:assets';
 import { ogImageFrom } from '../../lib/site-images';
 import {
   getAllObjects,
@@ -50,6 +51,7 @@ const isSold = d.availability === 'SOLD';
 /* Catalogue metadata — only fields that have been established are shown. */
 const fields: Array<[string, string | undefined]> = [
   ['Collection', department?.data.title],
+  ['Classification', d.classification],
   ['Period', d.period],
   ['Date', d.date],
   ['Origin', d.origin],
@@ -57,9 +59,17 @@ const fields: Array<[string, string | undefined]> = [
   ['Material', d.material],
   ['Dimensions', d.dimensions],
   ['Weight', d.weight],
+  ['Condition', d.conditionSummary],
   ['Availability', AVAILABILITY_LABEL[d.availability]],
 ];
 const shownFields = fields.filter(([, value]) => Boolean(value)) as Array<[string, string]>;
+
+/* Narrative fields may run to several paragraphs, separated by a blank line. */
+const paragraphs = (text?: string) =>
+  text
+    ?.split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 
 /**
  * Narrative sections. A section with no researched content renders the note
@@ -120,6 +130,14 @@ const standingSections = [
   },
 ];
 
+/* Absolute URLs for the object photography, for Product structured data. */
+const productImages = await Promise.all(
+  d.images.map(async (img) => {
+    const asset = await getImage({ src: img.src, format: 'jpeg', quality: 86 });
+    return new URL(asset.src, SITE.url).href;
+  }),
+);
+
 /* Product data is published only for objects genuinely offered for sale. */
 const productJsonLd = d.specimen
   ? null
@@ -131,6 +149,7 @@ const productJsonLd = d.specimen
       description: d.seoDescription ?? d.description ?? `${d.title}. ${d.period ?? ''}`.trim(),
       category: department?.data.title,
       material: d.material,
+      ...(productImages.length ? { image: productImages } : {}),
       url: new URL(path, SITE.url).href,
       brand: { '@id': `${SITE.url}/#organization` },
       offers: {
@@ -150,11 +169,16 @@ const productJsonLd = d.specimen
     };
 
 const enquirySubject = `${d.catalogueNumber}, ${d.title}`;
-const ogImage = await ogImageFrom(d.images[0]?.src);
+const ogImage = await ogImageFrom(d.images[0]?.src, { fit: 'contain' });
+
+/* A title already naming the house is used as given, not suffixed again. */
+const pageTitle = d.seoTitle ?? `${d.title}${d.period ? `, ${d.period}` : ''}`;
+const fullTitle = pageTitle.endsWith(SITE.name) ? pageTitle : undefined;
 ---
 
 <Base
-  title={d.seoTitle ?? `${d.title}${d.period ? `, ${d.period}` : ''}`}
+  title={pageTitle}
+  fullTitle={fullTitle}
   description={
     d.seoDescription ??
     `${d.title}. ${[d.period, d.date, d.origin].filter(Boolean).join(', ')}. ${formatPrice(d)}.`
@@ -162,6 +186,7 @@ const ogImage = await ogImageFrom(d.images[0]?.src);
   path={path}
   ogType="product"
   ogImage={ogImage}
+  ogImageAlt={d.images[0]?.alt}
   noindex={d.specimen}
 >
   <div class="shell">
@@ -195,34 +220,7 @@ const ogImage = await ogImageFrom(d.images[0]?.src);
     <div class="grid gap-x-16 gap-y-14 lg:grid-cols-12">
       <!-- Plates ---------------------------------------------------- -->
       <div class="lg:col-span-7">
-        <Plate
-          ratio="4 / 5"
-          tone="1"
-          image={d.images[0]?.src}
-          alt={d.images[0]?.alt ?? ''}
-          loading="eager"
-          sizes="(min-width: 1024px) 56vw, 100vw"
-        />
-        {
-          d.images.length === 0 && (
-            <p class="meta mt-4 text-ash">Object photography to follow.</p>
-          )
-        }
-        {
-          d.images.length > 1 && (
-            <div class="mt-4 grid grid-cols-3 gap-4">
-              {d.images.slice(1, 4).map((img) => (
-                <Plate
-                  ratio="1 / 1"
-                  tone="2"
-                  image={img.src}
-                  alt={img.alt}
-                  sizes="(min-width: 1024px) 18vw, 32vw"
-                />
-              ))}
-            </div>
-          )
-        }
+        <ObjectGallery images={d.images} title={d.title} />
       </div>
 
       <!-- Identity and metadata -------------------------------------- -->
@@ -256,6 +254,17 @@ const ogImage = await ogImageFrom(d.images[0]?.src);
             ))
           }
         </dl>
+
+        {
+          d.disclosure && (
+            <aside class="mt-8 border border-[var(--line-bronze)] px-5 py-4" aria-labelledby="disclosure-title">
+              <h2 id="disclosure-title" class="label-sm text-bronze-lit">
+                Reported, not verified
+              </h2>
+              <p class="meta mt-2 text-parchment">{d.disclosure}</p>
+            </aside>
+          )
+        }
 
         {
           !isSold ? (
@@ -310,7 +319,11 @@ const ogImage = await ogImageFrom(d.images[0]?.src);
             <section id={section.id} class="rule-t pt-8 pb-12 first:border-t-0 first:pt-0">
               <h3 class="label-sm text-ash">{section.heading}</h3>
               {section.body ? (
-                <p class="prose-fv mt-5 max-w-[40rem]">{section.body}</p>
+                <div class="prose-fv mt-5 max-w-[40rem]">
+                  {paragraphs(section.body)?.map((paragraph) => (
+                    <p>{paragraph}</p>
+                  ))}
+                </div>
               ) : section.list && section.list.length > 0 ? (
                 <ol class="mt-5 max-w-[40rem]">
                   {section.list.map((item) => (

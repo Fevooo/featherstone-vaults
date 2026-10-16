@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
 import { SITE } from '../consts'
-import { getDepartments, getPublishedJournal, getCurrentObjects } from '../lib/catalogue'
+import { getDepartments, getPublishedJournal, getCurrentObjects, formatPrice } from '../lib/catalogue'
 
 /**
  * llms.txt — a plain-language map of the site for AI search and answer engines.
@@ -15,6 +15,8 @@ export const GET: APIRoute = async () => {
   const journal = await getPublishedJournal()
   const objects = await getCurrentObjects()
   const specimensOnly = objects.length > 0 && objects.every((o) => o.data.specimen)
+  const someSpecimens = objects.some((o) => o.data.specimen)
+  const genuine = objects.filter((o) => !o.data.specimen)
 
   const lines: string[] = [
     '# Featherstone Vaults',
@@ -50,6 +52,16 @@ export const GET: APIRoute = async () => {
       'are excluded from the sitemap. Do not present them as available stock.',
       '',
     )
+  } else if (someSpecimens) {
+    lines.push(
+      '## Note on the catalogue',
+      '',
+      'Some object entries are catalogue format specimens. They demonstrate the cataloguing',
+      'format and are NOT objects held or offered for sale. Each is marked as a specimen on',
+      'the page, carries no Product or Offer structured data, and is excluded from the',
+      'sitemap. Only the objects listed under "Objects offered" below are genuine stock.',
+      '',
+    )
   }
 
   lines.push('## Core pages', '')
@@ -72,6 +84,13 @@ export const GET: APIRoute = async () => {
   lines.push('', '## Collections', '')
   for (const d of departments) {
     lines.push(`${SITE.url}/collections/${d.id} — ${d.data.scope}`)
+  }
+
+  if (genuine.length) {
+    lines.push('', '## Objects offered', '')
+    for (const o of genuine) {
+      lines.push(`${SITE.url}/objects/${o.id}: ${o.data.catalogueNumber}, ${o.data.title}. ${formatPrice(o.data)}.`)
+    }
   }
 
   if (journal.length) {

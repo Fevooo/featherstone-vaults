@@ -26,14 +26,21 @@ export function siteImage(name: string): ImageMetadata | undefined {
 /**
  * Renders a 1200x630 social card from a supplied photograph. Returns undefined
  * when there is no photograph, so the caller falls back to the brand card.
+ *
+ * `contain` keeps the whole photograph in frame, padded with black; it suits
+ * object photography shot against a black ground, where cropping to the wide
+ * card would cut the object itself.
  */
-export async function ogImageFrom(src?: ImageMetadata): Promise<string | undefined> {
+export async function ogImageFrom(
+  src?: ImageMetadata,
+  { fit = 'cover' }: { fit?: 'cover' | 'contain' } = {},
+): Promise<string | undefined> {
   if (!src) return undefined;
   const card = await getImage({
     src,
     width: 1200,
     height: 630,
-    fit: 'cover',
+    fit,
     position: 'center',
     format: 'jpeg',
     quality: 82,
