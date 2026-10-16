@@ -67,6 +67,22 @@ const objectsCollection = defineCollection({
        * metadata so that the distinction is made before the price is read.
        */
       disclosure: z.string().optional(),
+      /**
+       * Catalogue entry sections to leave off this object's page entirely,
+       * rather than showing the "In preparation" note.
+       */
+      omitSections: z
+        .array(
+          z.enum([
+            'overview',
+            'provenance',
+            'historical-context',
+            'condition',
+            'literature',
+            'comparative-examples',
+          ]),
+        )
+        .default([]),
       literature: z.array(z.string()).optional(),
       comparativeExamples: z.array(z.string()).optional(),
       certification: z.array(z.string()).optional(),

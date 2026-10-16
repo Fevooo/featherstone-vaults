@@ -23,6 +23,7 @@ description: |-
 provenance:
   - From the Artigas region, Uruguay. No earlier collection history or supporting documentation is recorded for this specimen.
 condition: Presented in its natural formation, with intricate crystalline growths and an irregular mineral matrix. No major damage. The specimen has not been independently inspected.
+omitSections: [historical-context, literature, comparative-examples]
 price: 1495
 currency: GBP
 availability: AVAILABLE

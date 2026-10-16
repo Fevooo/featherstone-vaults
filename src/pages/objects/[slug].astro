@@ -315,7 +315,7 @@ const fullTitle = pageTitle.endsWith(SITE.name) ? pageTitle : undefined;
 
       <div class="lg:col-span-8 lg:col-start-4">
         {
-          sections.map((section) => (
+          sections.filter((section) => !(d.omitSections as string[]).includes(section.id)).map((section) => (
             <section id={section.id} class="rule-t pt-8 pb-12 first:border-t-0 first:pt-0">
               <h3 class="label-sm text-ash">{section.heading}</h3>
               {section.body ? (
