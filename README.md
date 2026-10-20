@@ -346,6 +346,41 @@ archive pages, `Product` + `Offer` on genuine object pages, and `Article` on
 published journal entries. Specimens appear in an `ItemList` as plain named
 items with no offer attached.
 
+### Authorship and credentials
+
+A named, qualified author is the strongest credibility signal a one-person
+dealer has. `src/consts.ts` holds `PRINCIPAL`, the single source for the
+Journal byline, the author note under each article, the Training section on
+`/about` and the `Person` structured data, so the prose and the markup cannot
+drift apart.
+
+`src/lib/schema.ts` builds that `Person` and holds the stable `@id` values.
+The person is defined in full on `/about`, which is its canonical home, and
+again in each article's graph so the qualifications travel with the article.
+Everywhere else it is referenced by `@id`: the organisation names it as
+`founder`, and every `Article` names it as `author` while the organisation
+stays the `publisher`. Credentials are emitted as
+`EducationalOccupationalCredential` carrying the qualification and its subject
+only, with no level and no awarding body, matching how the diplomas are
+described on the site.
+
+Both the organisation and each article declare `publishingPrinciples`, pointing
+at `/provenance-authenticity`, which is the page that sets out what the house
+will and will not claim.
+
+**Bylines assert authorship.** Every published article is attributed to the
+principal by name. Read anything before publishing it, and change `PRINCIPAL`
+or the byline if a piece is not his work.
+
+### Internal linking
+
+Department pages list the Journal articles written against them, drawn from
+each article's `collection` field, and each article ends with three related
+pieces. `getRelatedJournal` ranks by shared department first, then shared
+keywords, and breaks ties by distance around a ring rather than list order.
+Ranking alone left two articles with almost nothing pointing at them; the ring
+keeps the fewest inbound links on any article at four rather than two.
+
 `/journal/rss.xml` is a feed of published articles, linked from every page.
 `/llms.txt` is a generated plain-language map of the site for AI search and
 answer engines; it states explicitly that the shipped catalogue entries are

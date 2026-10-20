@@ -1,8 +1,30 @@
 ---
 import Page from '../layouts/Page.astro';
 import Plate from '../components/Plate.astro';
-import { SITE } from '../consts';
+import { SITE, PRINCIPAL } from '../consts';
 import { siteImage } from '../lib/site-images';
+import { personNode, ORGANISATION_ID } from '../lib/schema';
+
+/**
+ * /about is the principal's canonical home, so the Person is defined here in
+ * full and referenced by @id from the organisation and from every article
+ * byline. Declaring the page itself as the person's profile ties the
+ * qualifications to the page that evidences them.
+ */
+const profile = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    personNode(),
+    {
+      '@type': 'AboutPage',
+      '@id': `${SITE.url}/about#page`,
+      url: `${SITE.url}/about`,
+      name: `About ${SITE.name}`,
+      mainEntity: { '@id': ORGANISATION_ID },
+      about: { '@id': ORGANISATION_ID },
+    },
+  ],
+};
 
 const principles = [
   {
@@ -114,20 +136,14 @@ const roles = [
             Palaeontology and a Diploma in Geology.
           </p>
           <dl class="mt-10 max-w-[40rem]">
-            <div class="rule-soft-t py-6">
-              <dt class="display-3 text-ivory">Diploma in Palaeontology</dt>
-              <dd class="prose-fv mt-3">
-                The fossil record and how it is read: what a specimen is, how it was formed and
-                what can reasonably be claimed about it.
-              </dd>
-            </div>
-            <div class="rule-soft-t py-6">
-              <dt class="display-3 text-ivory">Diploma in Geology</dt>
-              <dd class="prose-fv mt-3">
-                Origins, plate tectonics, rocks and minerals, volcanism, seismicity, weathering and
-                geological analysis.
-              </dd>
-            </div>
+            {
+              PRINCIPAL.credentials.map((credential) => (
+                <div class="rule-soft-t py-6">
+                  <dt class="display-3 text-ivory">{credential.name}</dt>
+                  <dd class="prose-fv mt-3">{credential.summary}</dd>
+                </div>
+              ))
+            }
           </dl>
           <div class="prose-fv mt-10 max-w-[40rem]">
             <p>
@@ -204,4 +220,6 @@ const roles = [
       </div>
     </section>
   </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(profile)} is:inline />
 </Page>

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { SITE } from '../../consts';
+import { SITE, PRINCIPAL } from '../../consts';
 import { getPublishedJournal } from '../../lib/catalogue';
 
 /**
@@ -31,6 +31,9 @@ export const GET: APIRoute = async () => {
         `      <guid isPermaLink="true">${url}</guid>`,
         `      <description>${escape(article.data.standfirst)}</description>`,
         `      <category>${escape(article.data.subject)}</category>`,
+        /* dc:creator rather than RSS <author>, which would require publishing
+           an email address alongside every item. */
+        `      <dc:creator>${escape(PRINCIPAL.name)}</dc:creator>`,
         article.data.published
           ? `      <pubDate>${article.data.published.toUTCString()}</pubDate>`
           : '',
@@ -42,7 +45,7 @@ export const GET: APIRoute = async () => {
     .join('\n');
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>The Featherstone Vaults Journal</title>
     <link>${SITE.url}/journal</link>

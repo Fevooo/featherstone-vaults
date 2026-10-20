@@ -7,9 +7,12 @@ import ListingSchema from '../../components/ListingSchema.astro';
 import {
   getDepartments,
   getObjectsInDepartment,
+  getJournalForDepartment,
   listingItem,
+  formatDate,
   type DepartmentEntry,
   type ObjectEntry,
+  type JournalEntry,
 } from '../../lib/catalogue';
 
 export const getStaticPaths = (async () => {
@@ -24,6 +27,7 @@ export const getStaticPaths = (async () => {
           current: objects.filter((o) => o.data.availability !== 'SOLD'),
           archived: objects.filter((o) => o.data.availability === 'SOLD'),
           siblings: departments.filter((d) => d.id !== department.id),
+          articles: await getJournalForDepartment(department.id),
         },
       };
     }),
@@ -35,9 +39,10 @@ interface Props {
   current: ObjectEntry[];
   archived: ObjectEntry[];
   siblings: DepartmentEntry[];
+  articles: JournalEntry[];
 }
 
-const { department, current, archived, siblings } = Astro.props;
+const { department, current, archived, siblings, articles } = Astro.props;
 const {
   title,
   intro,
@@ -202,6 +207,41 @@ const plateImage = image ?? remoteImage;
               </div>
             </div>
           </div>
+        </section>
+      )
+    }
+
+    {
+      articles.length > 0 && (
+        <section class="pt-24 md:pt-32" aria-labelledby="journal-heading">
+          <h2 id="journal-heading" class="label-sm rule-t py-5 text-bronze-lit">
+            From the Journal
+            <span class="ml-3 tnum text-ash">{String(articles.length).padStart(2, '0')}</span>
+          </h2>
+          <p class="meta mt-6 max-w-[46rem] text-ash">
+            Research written against this department: what to check, what the documents should
+            say, and where the record usually stops.
+          </p>
+          <ul class="mt-10 grid gap-x-12 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+            {articles.map((entry) => (
+              <li>
+                <a href={`/journal/${entry.id}`} class="group block">
+                  <p class="label-sm text-ash">{entry.data.subject}</p>
+                  <h3 class="display-3 mt-3 text-parchment transition-colors group-hover:text-ivory">
+                    {entry.data.title}
+                  </h3>
+                  <p class="meta mt-3 max-w-[46ch] text-ash">{entry.data.standfirst}</p>
+                  {entry.data.published && (
+                    <p class="meta mt-3 text-ash opacity-70">
+                      <time datetime={entry.data.published.toISOString().slice(0, 10)}>
+                        {formatDate(entry.data.published)}
+                      </time>
+                    </p>
+                  )}
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
       )
     }

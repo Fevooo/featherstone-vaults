@@ -4,27 +4,37 @@ import { render } from 'astro:content'
 import Base from '../../layouts/Base.astro'
 import Breadcrumbs from '../../components/Breadcrumbs.astro'
 import Plate from '../../components/Plate.astro'
-import { SITE } from '../../consts'
-import { getJournal, formatDate, type JournalEntry } from '../../lib/catalogue'
+import { SITE, PRINCIPAL } from '../../consts'
+import {
+  getJournal,
+  getRelatedJournal,
+  formatDate,
+  type JournalEntry,
+} from '../../lib/catalogue'
 import { ogImageFrom } from '../../lib/site-images'
+import { personNode, PERSON_ID, PUBLISHING_PRINCIPLES } from '../../lib/schema'
 
 export const getStaticPaths = (async () => {
   const articles = await getJournal()
-  return articles.map((article, i) => ({
-    params: { slug: article.id },
-    props: {
-      article,
-      next: articles[i + 1] ?? articles[0],
-    },
-  }))
+  return Promise.all(
+    articles.map(async (article, i) => ({
+      params: { slug: article.id },
+      props: {
+        article,
+        next: articles[i + 1] ?? articles[0],
+        related: await getRelatedJournal(article),
+      },
+    })),
+  )
 }) satisfies GetStaticPaths
 
 interface Props {
   article: JournalEntry
   next: JournalEntry
+  related: JournalEntry[]
 }
 
-const { article, next } = Astro.props
+const { article, next, related } = Astro.props
 const d = article.data
 const path = `/journal/${article.id}`
 const articleUrl = new URL(path, SITE.url).href
@@ -68,8 +78,12 @@ const structuredData = d.inPreparation
           isPartOf: { '@id': `${SITE.url}/#website` },
           datePublished: d.published?.toISOString(),
           dateModified: (d.updated ?? d.published)?.toISOString(),
-          author: { '@id': `${SITE.url}/#organization` },
+          /* A named, qualified author rather than the house itself. The
+             Person node is carried in this graph so the credentials travel
+             with the article instead of only existing on /about. */
+          author: { '@id': PERSON_ID },
           publisher: { '@id': `${SITE.url}/#organization` },
+          publishingPrinciples: PUBLISHING_PRINCIPLES,
           image: articleImageUrl,
           keywords: d.keywords,
           about: d.keywords.map((name) => ({
@@ -79,6 +93,9 @@ const structuredData = d.inPreparation
           citation: d.sources.map((source) => source.url),
           isAccessibleForFree: true,
           inLanguage: 'en-GB',
+        },
+        {
+          ...personNode(),
         },
         {
           '@type': 'BreadcrumbList',
@@ -126,6 +143,20 @@ const structuredData = d.inPreparation
         <p class="label-sm text-bronze-lit">{d.subject}</p>
         <h1 class="display-1 mt-7 max-w-[20ch] text-ivory">{d.title}</h1>
         <p class="prose-fv mt-8 max-w-[38rem] text-parchment md:mt-10">{d.standfirst}</p>
+        {
+          !d.inPreparation && (
+            <p class="meta mt-6 text-ash">
+              By{' '}
+              <a
+                href="/about"
+                rel="author"
+                class="text-parchment transition-colors hover:text-ivory"
+              >
+                {PRINCIPAL.name}
+              </a>
+            </p>
+          )
+        }
         {
           heroImage && (
             <>
@@ -254,6 +285,20 @@ const structuredData = d.inPreparation
                 </div>
               )}
 
+              <aside class="mt-12 rule-t pt-8" aria-labelledby="author-heading">
+                <h2 id="author-heading" class="label-sm text-ash">
+                  Written by
+                </h2>
+                <p class="display-3 mt-4 text-ivory">{PRINCIPAL.name}</p>
+                <p class="label-sm mt-3 text-bronze-lit">
+                  {PRINCIPAL.credentials.map((c) => c.name).join(' · ')}
+                </p>
+                <p class="prose-fv mt-5 max-w-[40rem]">{PRINCIPAL.summary}</p>
+                <a href="/about" class="action-quiet mt-7">
+                  About the house
+                </a>
+              </aside>
+
               <img
                 src="/brand/icon-bronze.svg"
                 alt=""
@@ -269,13 +314,21 @@ const structuredData = d.inPreparation
     </article>
 
     <nav aria-label="More writing" class="mt-20 rule-t pt-8 pb-24 md:mt-28 md:pb-32">
-      <p class="label-sm text-ash">Next</p>
-      <a href={`/journal/${next.id}`} class="group mt-5 block">
-        <h2 class="display-2 max-w-[24ch] text-parchment transition-colors group-hover:text-ivory">
-          {next.data.title}
-        </h2>
-        <p class="meta mt-4 max-w-[46ch] text-ash">{next.data.standfirst}</p>
-      </a>
+      <p class="label-sm text-ash">{related.length > 1 ? 'Further reading' : 'Next'}</p>
+      <ul class="mt-5 grid gap-x-12 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
+        {
+          (related.length ? related : [next]).map((entry) => (
+            <li>
+              <a href={`/journal/${entry.id}`} class="group block">
+                <h2 class="display-3 text-parchment transition-colors group-hover:text-ivory">
+                  {entry.data.title}
+                </h2>
+                <p class="meta mt-3 max-w-[46ch] text-ash">{entry.data.standfirst}</p>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
       <a href="/journal" class="action-quiet mt-10">All writing</a>
     </nav>
   </div>

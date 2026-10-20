@@ -17,6 +17,50 @@ export const SITE = {
   formEndpoint: '/api/enquiry',
 } as const;
 
+/**
+ * The person behind the house.
+ *
+ * A named, qualified author is the strongest credibility signal a one-person
+ * dealer has, and it is worth nothing if a search engine cannot see it. This
+ * is the single source for the Journal byline, the author note and the Person
+ * structured data, so the biography on /about and the markup cannot drift
+ * apart.
+ *
+ * knowsAbout is deliberately narrower than the ten departments: the house
+ * states that in-house assessment is strongest in natural history and that
+ * other fields are assessed with specialist help. Claiming more here would
+ * contradict the site and blur the topical signal.
+ */
+export const PRINCIPAL = {
+  name: 'Thomas Featherstone',
+  role: 'Principal',
+  summary:
+    'Featherstone Vaults is run by Thomas Featherstone, who holds a Diploma in Palaeontology and a Diploma in Geology. In-house assessment is strongest in natural history; material in other departments is assessed with specialist help, and each catalogue entry records whose opinion it rests on.',
+  /** Shown on /about and emitted as hasCredential. */
+  credentials: [
+    {
+      name: 'Diploma in Palaeontology',
+      subject: 'Palaeontology',
+      summary:
+        'The fossil record and how it is read: what a specimen is, how it was formed and what can reasonably be claimed about it.',
+    },
+    {
+      name: 'Diploma in Geology',
+      subject: 'Geology',
+      summary:
+        'Origins, plate tectonics, rocks and minerals, volcanism, seismicity, weathering and geological analysis.',
+    },
+  ],
+  knowsAbout: [
+    'Palaeontology',
+    'Geology',
+    'Mineralogy',
+    'Natural history specimens',
+    'Fossil assessment',
+    'Provenance and documentation',
+  ],
+} as const;
+
 export const NAV_PRIMARY = [
   { label: 'Objects', href: '/objects' },
   { label: 'Collections', href: '/collections' },

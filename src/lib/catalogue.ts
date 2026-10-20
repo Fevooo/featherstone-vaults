@@ -61,6 +61,46 @@ export async function getPublishedJournal(): Promise<JournalEntry[]> {
   return (await getJournal()).filter((a) => !a.data.inPreparation);
 }
 
+/** Published articles written against a department, for its page. */
+export async function getJournalForDepartment(id: string): Promise<JournalEntry[]> {
+  return (await getPublishedJournal()).filter((a) => a.data.collection === id);
+}
+
+/**
+ * Further reading for an article: the rest of its department first, then the
+ * nearest by shared keyword, then whatever else is published. Ordering by
+ * genuine overlap keeps the links useful to a reader rather than making a
+ * ring of unrelated ones.
+ */
+export async function getRelatedJournal(
+  article: JournalEntry,
+  limit = 3,
+): Promise<JournalEntry[]> {
+  const all = await getPublishedJournal();
+  const here = all.findIndex((a) => a.id === article.id);
+  const keywords = new Set(article.data.keywords);
+
+  const score = (a: JournalEntry) =>
+    (a.data.collection && a.data.collection === article.data.collection ? 100 : 0) +
+    a.data.keywords.filter((k) => keywords.has(k)).length;
+
+  /* Ties are broken by distance around a ring rather than by list order, so
+     that an article with no sibling in its department and no shared keyword
+     is still reached from its neighbours. Scoring alone left two pieces with
+     almost nothing pointing at them. */
+  const ring = (i: number) => {
+    const forward = (i - here + all.length) % all.length;
+    return Math.min(forward, all.length - forward);
+  };
+
+  return all
+    .map((a, i) => ({ a, s: score(a), r: ring(i) }))
+    .filter(({ a }) => a.id !== article.id)
+    .sort((x, y) => y.s - x.s || x.r - y.r)
+    .slice(0, limit)
+    .map(({ a }) => a);
+}
+
 
 /** Shapes an object for ListingSchema, omitting offers for specimens. */
 export function listingItem(object: ObjectEntry) {
