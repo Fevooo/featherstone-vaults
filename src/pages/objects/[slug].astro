@@ -7,6 +7,7 @@ import ObjectTile from '../../components/ObjectTile.astro';
 import { SITE, SPECIMEN_NOTICE } from '../../consts';
 import { getImage } from 'astro:assets';
 import { ogImageFrom } from '../../lib/site-images';
+import { RETURN_POLICY_ID } from '../../lib/schema';
 import {
   getAllObjects,
   getDepartments,
@@ -138,6 +139,16 @@ const productImages = await Promise.all(
   }),
 );
 
+/* A catalogued weight such as "2.20 kg" or "340 g", as a machine-readable value. */
+const weightMatch = d.weight?.match(/^\s*([\d.]+)\s*(kg|g)\s*$/i);
+const productWeight = weightMatch
+  ? {
+      '@type': 'QuantitativeValue',
+      value: Number(weightMatch[1]),
+      unitCode: weightMatch[2].toLowerCase() === 'kg' ? 'KGM' : 'GRM',
+    }
+  : undefined;
+
 /* Product data is published only for objects genuinely offered for sale. */
 const productJsonLd = d.specimen
   ? null
@@ -149,9 +160,9 @@ const productJsonLd = d.specimen
       description: d.seoDescription ?? d.description ?? `${d.title}. ${d.period ?? ''}`.trim(),
       category: department?.data.title,
       material: d.material,
+      ...(productWeight ? { weight: productWeight } : {}),
       ...(productImages.length ? { image: productImages } : {}),
       url: new URL(path, SITE.url).href,
-      brand: { '@id': `${SITE.url}/#organization` },
       offers: {
         '@type': 'Offer',
         url: new URL(path, SITE.url).href,
@@ -165,6 +176,8 @@ const productJsonLd = d.specimen
               : 'https://schema.org/SoldOut',
         seller: { '@id': `${SITE.url}/#organization` },
         businessFunction: 'http://purl.org/goodrelations/v1#Sell',
+        /* Defined in full on the organisation, from what /shipping states. */
+        hasMerchantReturnPolicy: { '@id': RETURN_POLICY_ID },
       },
     };
 

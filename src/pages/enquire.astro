@@ -1,11 +1,13 @@
 ---
 import Page from '../layouts/Page.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { webPageNode } from '../lib/schema';
 import EnquiryForm from '../components/forms/EnquiryForm.astro';
 import { SITE, COLLECTOR_INTERESTS } from '../consts';
 ---
 
 <Page
-  title="Enquire"
+  title="Contact and Enquiries"
   heading="Make an enquiry."
   eyebrow="Contact"
   description="Contact Featherstone Vaults about a specific object, a private search, a sale, or a question about provenance. Enquiries are answered personally."
@@ -100,6 +102,15 @@ import { SITE, COLLECTOR_INTERESTS } from '../consts';
       </div>
     </div>
   </div>
+  <JsonLd
+    data={webPageNode({
+      path: '/enquire',
+      type: 'ContactPage',
+      name: 'Contact Featherstone Vaults',
+      description:
+        'Contact Featherstone Vaults about a specific object, a private search, a sale, or a question about provenance.',
+    })}
+  />
 </Page>
 
 <script>

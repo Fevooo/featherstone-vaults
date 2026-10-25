@@ -14,6 +14,10 @@ export interface Props {
   noindex?: boolean;
   publishedTime?: Date;
   modifiedTime?: Date;
+  /** Article pages: the named author, the section and the topic tags. */
+  author?: string;
+  section?: string;
+  tags?: readonly string[];
 }
 
 const {
@@ -27,6 +31,9 @@ const {
   noindex = false,
   publishedTime,
   modifiedTime,
+  author,
+  section,
+  tags = [],
 } = Astro.props;
 
 const canonical = new URL(path, SITE.url).href.replace(/\/$/, '') || SITE.url;
@@ -60,3 +67,7 @@ const ogImageUrl = new URL(ogImage, SITE.url).href;
 
 {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
 {modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
+{author && <meta name="author" content={author} />}
+{author && <meta property="article:author" content={new URL('/about', SITE.url).href} />}
+{section && <meta property="article:section" content={section} />}
+{tags.map((tag) => <meta property="article:tag" content={tag} />)}

@@ -1,5 +1,8 @@
 ---
 import Page from '../layouts/Page.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { SITE } from '../consts';
+import { ORGANISATION_ID, webPageNode } from '../lib/schema';
 import EnquiryForm from '../components/forms/EnquiryForm.astro';
 import { BUDGET_RANGES } from '../consts';
 
@@ -25,13 +28,31 @@ const considered = [
     body: 'Where discretion matters more than reach, we approach a small number of known collectors directly.',
   },
 ];
+
+const service = {
+  '@type': 'Service',
+  '@id': `${SITE.url}/sell-an-object#service`,
+  name: 'Buying objects and collections',
+  serviceType: 'Purchase of antiques, natural history specimens and collections',
+  description:
+    'Individual objects, specialist collections and inherited collections considered for outright purchase, consignment or private sale. There is no charge for an initial view.',
+  url: `${SITE.url}/sell-an-object`,
+  provider: { '@id': ORGANISATION_ID },
+  areaServed: 'Worldwide',
+  audience: {
+    '@type': 'Audience',
+    audienceType: 'Private owners, collectors, executors and estates',
+  },
+  termsOfService: `${SITE.url}/terms`,
+  isRelatedTo: { '@id': `${SITE.url}/consignments#service` },
+};
 ---
 
 <Page
-  title="Sell an Object"
+  title="Sell Antiques, Fossils and Collections"
   heading="Exceptional objects deserve informed stewardship."
   eyebrow="Selling"
-  description="Featherstone Vaults considers individual objects, specialist collections and inherited collections for outright purchase, consignment or private sale."
+  description="Sell an object or inherited collection: outright purchase, consignment or private sale. Fossils, minerals, antiquities and more. The first conversation is free."
   path="/sell-an-object"
   standfirst="Most people who contact us about selling have one of two things: an object they know is good, or a collection they have inherited and cannot assess. Both are worth a conversation, and the first conversation costs nothing."
   trail={[{ label: 'Sell an Object', href: '/sell-an-object' }]}
@@ -135,4 +156,16 @@ const considered = [
       </div>
     </section>
   </div>
+
+  <JsonLd
+    data={[
+      webPageNode({
+        path: '/sell-an-object',
+        name: 'Sell antiques, fossils and collections',
+        description: service.description,
+        mainEntity: { '@id': service['@id'] },
+      }),
+      service,
+    ]}
+  />
 </Page>

@@ -36,6 +36,6 @@ images:
   - src: ./sculptural-mineral-formation-artigas-uruguay-02.png
     alt: The same mineral formation seen from an oblique angle, showing the depth of the hollowed matrix, the tall finger-like projections and the finely sparkling microcrystalline surface.
     caption: Oblique view
-seoTitle: Sculptural Mineral Formation from Uruguay | Featherstone Vaults
+seoTitle: Sculptural Mineral Formation, Artigas, Uruguay
 seoDescription: Discover an unusual 2.2 kg sculptural mineral formation from Artigas, Uruguay. A distinctive natural-history specimen curated by Featherstone Vaults.
 ---

@@ -1,0 +1,13 @@
+{
+  "name": "Featherstone Vaults",
+  "short_name": "Featherstone Vaults",
+  "description": "A private dealer and collection house for historically, scientifically and culturally significant objects. The Cotswolds, United Kingdom.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#0B0B0A",
+  "theme_color": "#0B0B0A",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+  ]
+}

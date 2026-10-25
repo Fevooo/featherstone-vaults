@@ -4,7 +4,13 @@ import Seo, { type Props as SeoProps } from '../components/Seo.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { SITE } from '../consts';
-import { ORGANISATION_ID, PERSON_ID, PUBLISHING_PRINCIPLES } from '../lib/schema';
+import {
+  ORGANISATION_ID,
+  PERSON_ID,
+  PUBLISHING_PRINCIPLES,
+  WEBSITE_ID,
+  returnPolicyNode,
+} from '../lib/schema';
 
 type Props = SeoProps & { bodyClass?: string };
 const { bodyClass = '', ...seo } = Astro.props;
@@ -34,15 +40,23 @@ const organisation = {
     areaServed: 'Worldwide',
     availableLanguage: 'English',
   },
-  makesOffer: {
-    '@type': 'Offer',
-    itemOffered: {
-      '@type': 'Service',
-      name: 'Private acquisition and sourcing',
-      description:
-        'Sourcing significant historical, scientific and natural history objects privately on behalf of collectors.',
+  /* Each service is described in full on its own page and referenced here, so
+     the house and what it offers resolve to one set of entities. */
+  makesOffer: [
+    {
+      '@type': 'Offer',
+      itemOffered: { '@id': `${SITE.url}/consignments#service` },
     },
-  },
+    {
+      '@type': 'Offer',
+      itemOffered: { '@id': `${SITE.url}/sell-an-object#service` },
+    },
+    {
+      '@type': 'Offer',
+      itemOffered: { '@id': `${SITE.url}/private-acquisitions#service` },
+    },
+  ],
+  hasMerchantReturnPolicy: returnPolicyNode(),
   /* Defined in full on /about; referenced here so the house and the person
      resolve to one another across the site. */
   founder: { '@id': PERSON_ID },
@@ -64,10 +78,11 @@ const organisation = {
 const website = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  '@id': `${SITE.url}/#website`,
+  '@id': WEBSITE_ID,
   url: SITE.url,
   name: SITE.name,
-  publisher: { '@id': `${SITE.url}/#organization` },
+  description: SITE.description,
+  publisher: { '@id': ORGANISATION_ID },
   inLanguage: 'en-GB',
 };
 ---
@@ -79,9 +94,11 @@ const website = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0B0B0A" />
     <meta name="format-detection" content="telephone=no" />
+    <meta name="application-name" content={SITE.name} />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="sitemap" href="/sitemap.xml" type="application/xml" />
     <link
       rel="alternate"

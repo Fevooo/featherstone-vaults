@@ -1,7 +1,8 @@
 import type { APIRoute } from 'astro'
 import { execFileSync } from 'node:child_process'
 import { SITE } from '../consts'
-import { getDepartments, getAllObjects, getJournal } from '../lib/catalogue'
+import { getImage } from 'astro:assets'
+import { getDepartments, getAllObjects, getJournal, getArchivedObjects } from '../lib/catalogue'
 
 /**
  * Last modified date for a source file, read from git. Returns undefined
@@ -43,6 +44,8 @@ type Entry = {
   priority: number
   changefreq: string
   lastmod?: Date
+  /** Absolute URLs of photographs of the page's subject, for image search. */
+  images?: Array<{ url: string }>
 }
 
 const STATIC_PAGES: Array<[string, number, string]> = [
@@ -63,8 +66,15 @@ const STATIC_PAGES: Array<[string, number, string]> = [
   ['/privacy', 0.3, 'yearly'],
 ]
 
+const xml = (text: string) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
 export const GET: APIRoute = async () => {
-  const entries: Entry[] = STATIC_PAGES.map(([path, priority, changefreq]) => ({
+  /* The archive stays out of the sitemap, as it is noindex, until it holds a
+     genuine sold entry. */
+  const archiveIsEmpty = !(await getArchivedObjects()).some((o) => !o.data.specimen)
+
+  const entries: Entry[] = STATIC_PAGES.filter(([path]) => path !== '/archive' || !archiveIsEmpty).map(([path, priority, changefreq]) => ({
     path,
     priority,
     changefreq,
@@ -87,6 +97,12 @@ export const GET: APIRoute = async () => {
       priority: object.data.availability === 'SOLD' ? 0.5 : 0.8,
       changefreq: object.data.availability === 'SOLD' ? 'yearly' : 'weekly',
       lastmod: object.data.soldDate ?? gitLastModified(`src/content/objects/${object.id}.md`),
+      images: await Promise.all(
+        object.data.images.map(async (img) => {
+          const asset = await getImage({ src: img.src, format: 'jpeg', quality: 86 })
+          return { url: new URL(asset.src, SITE.url).href }
+        }),
+      ),
     })
   }
 
@@ -104,7 +120,7 @@ export const GET: APIRoute = async () => {
   }
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${entries
   .map(
     (entry) =>
@@ -113,6 +129,9 @@ ${entries
       (entry.lastmod ? `    <lastmod>${entry.lastmod.toISOString().slice(0, 10)}</lastmod>\n` : '') +
       `    <changefreq>${entry.changefreq}</changefreq>\n` +
       `    <priority>${entry.priority.toFixed(1)}</priority>\n` +
+      (entry.images ?? [])
+        .map((image) => `    <image:image>\n      <image:loc>${xml(image.url)}</image:loc>\n    </image:image>\n`)
+        .join('') +
       `  </url>`,
   )
   .join('\n')}
