@@ -3,7 +3,9 @@ import Base from '../layouts/Base.astro';
 import SectionHead from '../components/SectionHead.astro';
 import CollectionPanel from '../components/CollectionPanel.astro';
 import ObjectTile from '../components/ObjectTile.astro';
+import JsonLd from '../components/JsonLd.astro';
 import { SITE } from '../consts';
+import { webPageNode } from '../lib/schema';
 import { getDepartments, getFeaturedObjects, getJournal } from '../lib/catalogue';
 
 const departments = await getDepartments();
@@ -29,9 +31,9 @@ const principles = [
 ---
 
 <Base
-  fullTitle="Featherstone Vaults · Exceptional Objects. Remarkable Histories."
+  fullTitle="Featherstone Vaults · Antiquities, Fossils and Rare Historical Objects"
   title="Featherstone Vaults"
-  description="A private dealer and collection house for historically, scientifically and culturally significant objects. The Cotswolds, United Kingdom."
+  description="Cotswolds dealer in antiquities, fossils, minerals, meteorites, rare books and historic objects. Documented provenance, consignment and private sourcing."
   path="/"
 >
   <!-- Hero ---------------------------------------------------------- -->
@@ -270,4 +272,23 @@ const principles = [
       </div>
     </div>
   </section>
+
+  <JsonLd
+    data={{
+      ...webPageNode({
+        path: '/',
+        name: SITE.name,
+        description: SITE.description,
+      }),
+      primaryImageOfPage: {
+        '@type': 'ImageObject',
+        url: `${SITE.url}/og/featherstone-vaults.png`,
+        width: 1200,
+        height: 630,
+      },
+      hasPart: journal
+        .filter((a) => !a.data.inPreparation)
+        .map((a) => ({ '@type': 'Article', '@id': `${SITE.url}/journal/${a.id}#article` })),
+    }}
+  />
 </Base>

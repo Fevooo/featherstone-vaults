@@ -1,6 +1,12 @@
 import type { APIRoute } from 'astro'
-import { SITE } from '../consts'
-import { getDepartments, getPublishedJournal, getCurrentObjects, formatPrice } from '../lib/catalogue'
+import { SITE, PRINCIPAL } from '../consts'
+import {
+  getDepartments,
+  getPublishedJournal,
+  getCurrentObjects,
+  getArchivedObjects,
+  formatPrice,
+} from '../lib/catalogue'
 
 /**
  * llms.txt — a plain-language map of the site for AI search and answer engines.
@@ -17,6 +23,7 @@ export const GET: APIRoute = async () => {
   const specimensOnly = objects.length > 0 && objects.every((o) => o.data.specimen)
   const someSpecimens = objects.some((o) => o.data.specimen)
   const genuine = objects.filter((o) => !o.data.specimen)
+  const hasArchive = (await getArchivedObjects()).some((o) => !o.data.specimen)
 
   const lines: string[] = [
     '# Featherstone Vaults',
@@ -64,6 +71,20 @@ export const GET: APIRoute = async () => {
     )
   }
 
+  lines.push(
+    '## Key facts',
+    '',
+    `- Name: ${SITE.name}`,
+    `- Location: ${SITE.locality}, ${SITE.region}, ${SITE.country}. Works with collectors worldwide.`,
+    `- Principal: ${PRINCIPAL.name}, ${PRINCIPAL.credentials.map((c) => c.name).join(' and ')}.`,
+    '- Services: objects for sale, consignment, outright purchase, private sale and private sourcing.',
+    '- Returns: an object materially not as described may be returned within 14 days of delivery;',
+    '  the purchase price and the return shipping are refunded.',
+    '- Shipping: fully insured, worldwide. UK export licences are identified before sale and applied for by the house.',
+    `- Contact: ${SITE.email} or ${SITE.url}/enquire`,
+    '',
+  )
+
   lines.push('## Core pages', '')
   for (const p of [
     '/',
@@ -75,7 +96,9 @@ export const GET: APIRoute = async () => {
     '/provenance-authenticity',
     '/about',
     '/private-acquisitions',
-    '/archive',
+    '/private-access',
+    '/shipping',
+    ...(hasArchive ? ['/archive'] : []),
     '/enquire',
   ]) {
     lines.push(`${SITE.url}${p === '/' ? '/' : p}`)

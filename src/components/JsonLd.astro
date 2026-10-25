@@ -1,0 +1,12 @@
+---
+/** One structured data block. Pass a node or a graph; @context is added. */
+interface Props {
+  data: Record<string, unknown> | Record<string, unknown>[];
+}
+const { data } = Astro.props;
+const doc = Array.isArray(data)
+  ? { '@context': 'https://schema.org', '@graph': data }
+  : { '@context': 'https://schema.org', ...data };
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(doc)} is:inline />

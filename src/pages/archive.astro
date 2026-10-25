@@ -10,18 +10,22 @@ import {
 } from '../lib/catalogue';
 
 const archived = await getArchivedObjects();
+/* An archive with no genuine sold entries is an empty page: keep it out of the
+   index until there is something on it to find. */
+const archiveIsEmpty = !archived.some((o) => !o.data.specimen);
 const departments = await getDepartments();
 const departmentTitle = (id: string) => departments.find((d) => d.id === id)?.data.title ?? id;
 ---
 
 <Page
-  title="Archive"
+  title="Archive of Sold Objects"
   heading="Featherstone Vaults Archive."
   eyebrow="Archive"
   description="A permanent record of objects that have passed through Featherstone Vaults. Sold entries are retained so each object's history stays traceable."
   path="/archive"
   standfirst="Objects that have been sold are not deleted. Their entries stay here permanently, so that a future owner, a researcher or an insurer can find what was recorded about an object at the time it changed hands."
   trail={[{ label: 'Archive', href: '/archive' }]}
+  noindex={archiveIsEmpty}
 >
   <ListingSchema
     name="Featherstone Vaults Archive"

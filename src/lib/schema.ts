@@ -44,3 +44,60 @@ export function personNode() {
     })),
   }
 }
+
+export const RETURN_POLICY_ID = `${SITE.url}/shipping#returns`
+
+/**
+ * The returns policy exactly as /shipping states it: an object materially not
+ * as described may be returned within fourteen days of delivery, and the
+ * purchase price and the return shipping are refunded.
+ *
+ * Only the not-as-described case is marked up. The site makes no promise about
+ * returns for a change of mind, so customerRemorseReturnFees is deliberately
+ * absent rather than guessed.
+ */
+export function returnPolicyNode() {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    '@id': RETURN_POLICY_ID,
+    name: 'Returns for objects not as described',
+    url: `${SITE.url}/shipping`,
+    applicableCountry: SITE.countryCode,
+    returnPolicyCountry: SITE.countryCode,
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: 14,
+    returnMethod: 'https://schema.org/ReturnByMail',
+    itemDefectReturnFees: 'https://schema.org/FreeReturn',
+    refundType: 'https://schema.org/FullRefund',
+  }
+}
+
+type WebPageType = 'WebPage' | 'ContactPage' | 'AboutPage' | 'FAQPage' | 'CollectionPage'
+
+/**
+ * A page node tied into the site graph: the page belongs to the website, is
+ * about (or published by) the house, and is in British English. Pages that
+ * describe a single thing pass it as mainEntity.
+ */
+export function webPageNode(opts: {
+  path: string
+  name: string
+  description: string
+  type?: WebPageType
+  mainEntity?: Record<string, unknown>
+  about?: Record<string, unknown>
+}) {
+  const url = new URL(opts.path, SITE.url).href.replace(/\/$/, '') || SITE.url
+  return {
+    '@type': opts.type ?? 'WebPage',
+    '@id': `${url}#page`,
+    url,
+    name: opts.name,
+    description: opts.description,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: opts.about ?? { '@id': ORGANISATION_ID },
+    publisher: { '@id': ORGANISATION_ID },
+    inLanguage: 'en-GB',
+    ...(opts.mainEntity ? { mainEntity: opts.mainEntity } : {}),
+  }
+}

@@ -1,5 +1,6 @@
 ---
 import LegalPage from '../components/LegalPage.astro';
+import { webPageNode, returnPolicyNode } from '../lib/schema';
 
 const sections = [
   {
@@ -63,10 +64,18 @@ const sections = [
 
 <LegalPage
   title="Shipping"
+  seoTitle="Shipping, Export Licences and Returns"
   heading="Shipping & Export."
   eyebrow="Information"
   description="How Featherstone Vaults packs, insures, ships and documents objects, including UK export licensing, import duties and returns."
   path="/shipping"
   standfirst="Moving a significant object is a specialist job and most of the risk sits in the packing. This is how we handle it."
   sections={sections}
+  schema={webPageNode({
+    path: '/shipping',
+    name: 'Shipping, export licences and returns',
+    description:
+      'How Featherstone Vaults packs, insures, ships and documents objects, including UK export licensing, import duties and returns.',
+    mainEntity: returnPolicyNode(),
+  })}
 />

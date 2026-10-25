@@ -1,5 +1,8 @@
 ---
 import Page from '../layouts/Page.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { SITE } from '../consts';
+import { ORGANISATION_ID, webPageNode } from '../lib/schema';
 import EnquiryForm from '../components/forms/EnquiryForm.astro';
 import { COLLECTOR_INTERESTS, BUDGET_RANGES } from '../consts';
 
@@ -15,13 +18,27 @@ const areas = [
   'Shipwreck artefacts',
   'Significant historic objects',
 ];
+
+const service = {
+  '@type': 'Service',
+  '@id': `${SITE.url}/private-acquisitions#service`,
+  name: 'Private acquisition and sourcing',
+  serviceType: 'Private sourcing of historical, scientific and natural history objects',
+  description:
+    'Sourcing significant historical, scientific and natural history objects privately on behalf of collectors, through dealers, private collections, estates and specialist auction departments.',
+  url: `${SITE.url}/private-acquisitions`,
+  provider: { '@id': ORGANISATION_ID },
+  areaServed: 'Worldwide',
+  audience: { '@type': 'Audience', audienceType: 'Private collectors' },
+  termsOfService: `${SITE.url}/terms`,
+};
 ---
 
 <Page
-  title="Private Acquisitions"
+  title="Private Sourcing for Collectors"
   heading="Some objects are never publicly offered."
   eyebrow="Private Sourcing"
-  description="Featherstone Vaults sources significant objects privately for collectors: antiquities, spaceflight material, meteorites, rare books and more."
+  description="Looking for a specific object? Featherstone Vaults searches privately for collectors: fossils, meteorites, antiquities, spaceflight material and rare books."
   path="/private-acquisitions"
   standfirst="A substantial part of this market never reaches a public catalogue. Objects move between collections, estates, institutions and specialist dealers, often without ever being advertised. Where a collector is looking for something specific, we will look for it."
   trail={[{ label: 'Private Acquisitions', href: '/private-acquisitions' }]}
@@ -116,4 +133,26 @@ const areas = [
       </div>
     </section>
   </div>
+
+  <JsonLd
+    data={[
+      webPageNode({
+        path: '/private-acquisitions',
+        name: 'Private sourcing for collectors',
+        description: service.description,
+        mainEntity: { '@id': service['@id'] },
+      }),
+      {
+        ...service,
+        hasOfferCatalog: {
+          '@type': 'OfferCatalog',
+          name: 'Areas searched',
+          itemListElement: areas.map((area) => ({
+            '@type': 'Offer',
+            itemOffered: { '@type': 'Thing', name: area },
+          })),
+        },
+      },
+    ]}
+  />
 </Page>

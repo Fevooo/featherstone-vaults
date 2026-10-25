@@ -1,5 +1,7 @@
 ---
 import Page from '../layouts/Page.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { webPageNode, PERSON_ID } from '../lib/schema';
 
 const sections = [
   {
@@ -76,10 +78,10 @@ const sections = [
 ---
 
 <Page
-  title="Provenance & Authenticity"
+  title="Provenance and Authenticity Standards"
   heading="Provenance & Authenticity."
   eyebrow="Standards"
-  description="How Featherstone Vaults approaches provenance, authenticity, condition reporting, legal title, cultural property and export requirements."
+  description="How Featherstone Vaults documents provenance, states authenticity, reports condition, checks legal title and handles cultural property and export licences."
   path="/provenance-authenticity"
   standfirst="This page sets out how we work. It is deliberately specific, because a general statement about integrity is worth nothing to a buyer trying to assess an object."
   trail={[{ label: 'Provenance & Authenticity', href: '/provenance-authenticity' }]}
@@ -132,4 +134,22 @@ const sections = [
       </div>
     </div>
   </div>
+
+  <!-- The house's publishing principles: what it will and will not claim. -->
+  <JsonLd
+    data={{
+      ...webPageNode({
+        path: '/provenance-authenticity',
+        name: 'Provenance and authenticity standards',
+        description:
+          'How Featherstone Vaults documents provenance, states authenticity, reports condition, checks legal title and handles cultural property and export licences.',
+      }),
+      author: { '@id': PERSON_ID },
+      hasPart: sections.map((section) => ({
+        '@type': 'WebPageElement',
+        name: section.heading,
+        text: section.body.join(' '),
+      })),
+    }}
+  />
 </Page>

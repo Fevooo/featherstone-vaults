@@ -81,7 +81,12 @@ const structuredData = d.inPreparation
           /* A named, qualified author rather than the house itself. The
              Person node is carried in this graph so the credentials travel
              with the article instead of only existing on /about. */
-          author: { '@id': PERSON_ID },
+          author: {
+            '@type': 'Person',
+            '@id': PERSON_ID,
+            name: PRINCIPAL.name,
+            url: `${SITE.url}/about`,
+          },
           publisher: { '@id': `${SITE.url}/#organization` },
           publishingPrinciples: PUBLISHING_PRINCIPLES,
           image: articleImageUrl,
@@ -91,30 +96,14 @@ const structuredData = d.inPreparation
             name,
           })),
           citation: d.sources.map((source) => source.url),
+          wordCount: article.body?.split(/\s+/).filter(Boolean).length,
           isAccessibleForFree: true,
           inLanguage: 'en-GB',
         },
         {
           ...personNode(),
         },
-        {
-          '@type': 'BreadcrumbList',
-          '@id': `${articleUrl}#breadcrumbs`,
-          itemListElement: [
-            {
-              '@type': 'ListItem',
-              position: 1,
-              name: 'Journal',
-              item: `${SITE.url}/journal`,
-            },
-            {
-              '@type': 'ListItem',
-              position: 2,
-              name: d.title,
-              item: articleUrl,
-            },
-          ],
-        },
+        /* The trail itself is emitted once, by the Breadcrumbs component. */
       ],
     }
 ---
@@ -128,6 +117,9 @@ const structuredData = d.inPreparation
   noindex={d.inPreparation}
   publishedTime={d.published}
   modifiedTime={d.updated ?? d.published}
+  author={d.inPreparation ? undefined : PRINCIPAL.name}
+  section={d.subject}
+  tags={d.keywords}
 >
   <div class="shell">
     <Breadcrumbs

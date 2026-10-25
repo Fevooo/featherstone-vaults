@@ -1,5 +1,6 @@
 ---
 import Page from '../layouts/Page.astro';
+import JsonLd from './JsonLd.astro';
 
 export interface Section {
   heading: string;
@@ -17,13 +18,18 @@ interface Props {
   sections: Section[];
   /** Short line under the last section, e.g. a review date. */
   footnote?: string;
+  /** The <title> text, when it should say more than the breadcrumb label. */
+  seoTitle?: string;
+  /** Page-level structured data. */
+  schema?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, heading, eyebrow, description, path, standfirst, sections, footnote } = Astro.props;
+const { title, heading, eyebrow, description, path, standfirst, sections, footnote, seoTitle, schema } =
+  Astro.props;
 ---
 
 <Page
-  title={title}
+  title={seoTitle ?? title}
   heading={heading ?? `${title}.`}
   eyebrow={eyebrow}
   description={description}
@@ -78,4 +84,5 @@ const { title, heading, eyebrow, description, path, standfirst, sections, footno
       </div>
     </div>
   </div>
+  {schema && <JsonLd data={schema} />}
 </Page>

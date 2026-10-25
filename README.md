@@ -101,9 +101,9 @@ preparation" line rather than approximated text.
 To publish real stock: delete the specimen files, add real entries with
 `specimen` omitted or `false`, and fill the narrative fields.
 
-Seven of the eight journal articles are likewise `inPreparation: true` and
-`noindex`. Only *How to Build a Serious Private Collection* is published; it is
-written in the house's voice and should be read and approved before launch.
+Journal articles can be held back with `inPreparation: true`, which renders a
+holding note and sets `noindex`. All current articles are published under the
+principal's byline; read each one before it goes live.
 
 `/terms` and `/privacy` are working drafts and carry a note to that effect. They
 should be reviewed by a solicitor against the business's actual practice.
@@ -339,12 +339,32 @@ page that marks itself `noindex`.
 `robots.txt` allows all legitimate crawlers, including AI search and answer
 engines.
 
-Structured data: `Organization` (with contact point and offered service) and
-`WebSite` on every page, `BreadcrumbList` on every page with a trail,
+Structured data: `Organization` and `WebSite` on every page, `BreadcrumbList`
+on every page with a trail (emitted once, by the `Breadcrumbs` component),
 `CollectionPage` + `ItemList` on the catalogue, collections, department and
 archive pages, `Product` + `Offer` on genuine object pages, and `Article` on
 published journal entries. Specimens appear in an `ItemList` as plain named
 items with no offer attached.
+
+Page-level nodes tie the rest of the site into the same graph: `WebPage` on the
+homepage, `ContactPage` on `/enquire`, `AboutPage` on `/about`, and a `Service`
+on each of `/consignments`, `/sell-an-object` and `/private-acquisitions`. The
+organisation's `makesOffer` references those three services by `@id` rather
+than describing them again. `src/components/JsonLd.astro` emits a block and
+`webPageNode()` in `src/lib/schema.ts` builds a page node.
+
+The returns policy is marked up once, as a `MerchantReturnPolicy` on the
+organisation, and each `Offer` references it. It records only what `/shipping`
+says: an object materially not as described can be returned within 14 days,
+with the price and return shipping refunded. Nothing is claimed about
+change-of-mind returns. Change the policy on `/shipping` and `returnPolicyNode()`
+together. There is no `shippingDetails`, because the site does not publish a
+shipping rate; add one if a fixed UK rate is ever stated.
+
+The archive is `noindex` and left out of the sitemap and `llms.txt` while it
+holds no genuine sold entry, so an empty page is not offered to search engines.
+The sitemap carries `image:image` entries for object photography, using the same
+JPEG renditions as the `Product` markup.
 
 ### Authorship and credentials
 
