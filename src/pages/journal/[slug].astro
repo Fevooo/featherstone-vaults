@@ -4,27 +4,37 @@ import { render } from 'astro:content'
 import Base from '../../layouts/Base.astro'
 import Breadcrumbs from '../../components/Breadcrumbs.astro'
 import Plate from '../../components/Plate.astro'
+import ObjectTile from '../../components/ObjectTile.astro'
 import { SITE, PRINCIPAL } from '../../consts'
 import {
   getJournal,
   getRelatedJournal,
+  getDepartments,
+  getOfferedInDepartment,
   formatDate,
   type JournalEntry,
+  type ObjectEntry,
 } from '../../lib/catalogue'
 import { ogImageFrom } from '../../lib/site-images'
 import { personNode, PERSON_ID, PUBLISHING_PRINCIPLES } from '../../lib/schema'
 
 export const getStaticPaths = (async () => {
   const articles = await getJournal()
+  const departments = await getDepartments()
   return Promise.all(
-    articles.map(async (article, i) => ({
-      params: { slug: article.id },
-      props: {
-        article,
-        next: articles[i + 1] ?? articles[0],
-        related: await getRelatedJournal(article),
-      },
-    })),
+    articles.map(async (article, i) => {
+      const department = departments.find((d) => d.id === article.data.collection)
+      return {
+        params: { slug: article.id },
+        props: {
+          article,
+          next: articles[i + 1] ?? articles[0],
+          related: await getRelatedJournal(article),
+          collectionLabel: department?.data.title,
+          offered: department ? await getOfferedInDepartment(department.id) : [],
+        },
+      }
+    }),
   )
 }) satisfies GetStaticPaths
 
@@ -32,9 +42,11 @@ interface Props {
   article: JournalEntry
   next: JournalEntry
   related: JournalEntry[]
+  collectionLabel?: string
+  offered: ObjectEntry[]
 }
 
-const { article, next, related } = Astro.props
+const { article, next, related, collectionLabel, offered } = Astro.props
 const d = article.data
 const path = `/journal/${article.id}`
 const articleUrl = new URL(path, SITE.url).href
@@ -44,19 +56,8 @@ const heroImage = d.image ?? d.remoteImage
 const ogImage = d.image ? await ogImageFrom(d.image) : d.remoteImage
 const articleImageUrl = ogImage ? new URL(ogImage, SITE.url).href : undefined
 
-const collectionLabels: Record<string, string> = {
-  antiquities: 'Antiquities',
-  'natural-history': 'Natural History',
-  timepieces: 'Timepieces',
-  'shipwreck-maritime': 'Shipwreck & Maritime',
-  'space-exploration': 'Space & Exploration',
-}
-
 const relatedCollection = d.collection
-  ? {
-      slug: d.collection,
-      label: collectionLabels[d.collection] ?? d.collection,
-    }
+  ? { slug: d.collection, label: collectionLabel ?? d.collection }
   : null
 
 const structuredData = d.inPreparation
@@ -304,6 +305,29 @@ const structuredData = d.inPreparation
         )
       }
     </article>
+
+    {
+      !d.inPreparation && offered.length > 0 && (
+        <section class="mt-20 rule-t pt-8 md:mt-28" aria-labelledby="offered-heading">
+          <h2 id="offered-heading" class="label-sm text-bronze-lit">
+            From the catalogue
+          </h2>
+          <div class="mt-10 grid grid-cols-2 gap-x-5 gap-y-12 md:gap-x-7 lg:grid-cols-4 lg:gap-x-8">
+            {offered.map((object) => (
+              <ObjectTile
+                object={object}
+                sizes="(min-width: 1024px) 23vw, (min-width: 768px) 30vw, 45vw"
+              />
+            ))}
+          </div>
+          {relatedCollection && (
+            <a href={`/collections/${relatedCollection.slug}`} class="action-quiet mt-10">
+              All {relatedCollection.label}
+            </a>
+          )}
+        </section>
+      )
+    }
 
     <nav aria-label="More writing" class="mt-20 rule-t pt-8 pb-24 md:mt-28 md:pb-32">
       <p class="label-sm text-ash">{related.length > 1 ? 'Further reading' : 'Next'}</p>

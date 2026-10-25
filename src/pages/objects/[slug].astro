@@ -11,40 +11,49 @@ import { RETURN_POLICY_ID } from '../../lib/schema';
 import {
   getAllObjects,
   getDepartments,
+  getJournalForDepartment,
   formatPrice,
   formatDate,
   AVAILABILITY_LABEL,
   type ObjectEntry,
   type DepartmentEntry,
+  type JournalEntry,
 } from '../../lib/catalogue';
 
 export const getStaticPaths = (async () => {
   const objects = await getAllObjects();
   const departments = await getDepartments();
-  return objects.map((object) => ({
-    params: { slug: object.id },
-    props: {
-      object,
-      department: departments.find((d) => d.id === object.data.collection),
-      related: [
-        ...objects.filter(
-          (o) => o.data.collection === object.data.collection && o.id !== object.id,
-        ),
-        ...objects.filter(
-          (o) => o.data.collection !== object.data.collection && o.id !== object.id,
-        ),
-      ].slice(0, 4),
-    },
-  }));
+  /* Genuine stock is linked ahead of format specimens, and the same
+     department ahead of others, so the strongest links go to pages that can
+     actually be indexed and bought from. */
+  const rank = (object: ObjectEntry, o: ObjectEntry) =>
+    (o.data.specimen ? 2 : 0) + (o.data.collection === object.data.collection ? 0 : 1);
+  return Promise.all(
+    objects.map(async (object) => ({
+      params: { slug: object.id },
+      props: {
+        object,
+        department: departments.find((d) => d.id === object.data.collection),
+        related: objects
+          .filter((o) => o.id !== object.id)
+          .map((o, i) => ({ o, r: rank(object, o), i }))
+          .sort((x, y) => x.r - y.r || x.i - y.i)
+          .slice(0, 4)
+          .map(({ o }) => o),
+        reading: (await getJournalForDepartment(object.data.collection)).slice(0, 3),
+      },
+    })),
+  );
 }) satisfies GetStaticPaths;
 
 interface Props {
   object: ObjectEntry;
   department?: DepartmentEntry;
   related: ObjectEntry[];
+  reading: JournalEntry[];
 }
 
-const { object, department, related } = Astro.props;
+const { object, department, related, reading } = Astro.props;
 const d = object.data;
 const path = `/objects/${object.id}`;
 const isSold = d.availability === 'SOLD';
@@ -363,6 +372,30 @@ const fullTitle = pageTitle.endsWith(SITE.name) ? pageTitle : undefined;
       </div>
     </div>
   </article>
+
+  {
+    reading.length > 0 && (
+      <section class="shell pt-16" aria-labelledby="reading-title">
+        <div class="rule-t pt-8">
+          <h2 id="reading-title" class="label-sm text-bronze-lit">
+            Further reading
+          </h2>
+          <ul class="mt-8 grid gap-x-12 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
+            {reading.map((entry) => (
+              <li>
+                <a href={`/journal/${entry.id}`} class="group block">
+                  <h3 class="display-3 text-parchment transition-colors group-hover:text-ivory">
+                    {entry.data.title}
+                  </h3>
+                  <p class="meta mt-3 max-w-[46ch] text-ash">{entry.data.standfirst}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
 
   {
     related.length > 0 && (
