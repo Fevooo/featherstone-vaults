@@ -46,6 +46,18 @@ export async function getObjectsInDepartment(id: string): Promise<ObjectEntry[]>
   return all.filter((o) => o.data.collection === id);
 }
 
+/**
+ * Genuine objects currently offered in a department, for linking from the
+ * Journal. Specimens are left out: they are noindex and describe nothing that
+ * can be bought, so a link to one from an article would mislead.
+ */
+export async function getOfferedInDepartment(id: string, limit = 3): Promise<ObjectEntry[]> {
+  const current = await getCurrentObjects();
+  return current
+    .filter((o) => o.data.collection === id && !o.data.specimen && o.data.availability !== 'PRIVATE')
+    .slice(0, limit);
+}
+
 export async function getFeaturedObjects(limit = 4): Promise<ObjectEntry[]> {
   const current = await getCurrentObjects();
   const featured = current.filter((o) => o.data.featured);
