@@ -3,7 +3,7 @@ title: How to Judge a Mineral Specimen
 standfirst: A mineral specimen is worth what its locality, its condition and its honesty make it worth. The useful questions are where it came from, what has been done to it, and how sure anyone can be about what it is.
 subject: Natural History
 readingTime: 7 min
-inPreparation: true
+published: 2026-10-25
 order: 9
 collection: natural-history
 keywords:
