@@ -3,7 +3,7 @@ title: Selling an Inherited Fossil, Mineral or Meteorite Collection
 standfirst: An inherited natural history collection is often worth more than the family expects, and almost always worth more with its labels than without them. What to keep, what to check and what to ask before anything is sold.
 subject: Natural History
 readingTime: 8 min
-inPreparation: true
+published: 2026-10-25
 order: 10
 collection: natural-history
 keywords:

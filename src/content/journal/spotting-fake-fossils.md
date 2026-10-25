@@ -3,7 +3,7 @@ title: How to Spot a Fake or Composite Fossil
 standfirst: Fossil forgery is old, skilled and still common. Most fakes fall into a few kinds, from resin casts and assembled composites to painted detail, and each leaves signs a careful buyer can learn to look for.
 subject: Natural History
 readingTime: 8 min
-inPreparation: true
+published: 2026-10-25
 order: 11
 collection: natural-history
 keywords:
