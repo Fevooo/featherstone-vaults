@@ -17,10 +17,10 @@ description: |-
 
   Selected for its proportions, its textured gold case and the restraint of its dial.
 provenance:
-  - Acquired by Featherstone Vaults from a member of LAPADA, the Association of Art & Antiques Dealers.
+  - Acquired by Featherstone Vaults from a French glass dealer, a member of LAPADA, the Association of Art & Antiques Dealers.
 condition: The case back shows fine surface scratching consistent with age and wear. The movement's service history has not been established.
 omitSections: [historical-context, literature, comparative-examples]
-priceOnApplication: true
+price: 2950
 currency: GBP
 availability: AVAILABLE
 featured: true
