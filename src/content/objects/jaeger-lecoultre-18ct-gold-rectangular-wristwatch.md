@@ -5,7 +5,8 @@ collection: timepieces
 classification: Rectangular dress wristwatch, manual wind
 date: 1970s
 origin: Switzerland
-material: 18ct yellow gold case, green leather strap
+material: 18ct yellow gold case, green crocodile strap
+dimensions: Case 23 × 30 mm
 description: |-
   A rectangular dress watch by Jaeger-LeCoultre, cased in 18ct yellow gold and dating from the 1970s.
 
@@ -13,7 +14,7 @@ description: |-
 
   The movement is hand-wound, through the gold crown at three o'clock. The case back is hallmarked and numbered 1 293 574.
 
-  It is fitted with a green leather strap with a crocodile-pattern grain.
+  On a green crocodile strap.
 
   Selected for its proportions, its textured gold case and the restraint of its dial.
 provenance:
@@ -27,7 +28,7 @@ featured: true
 order: 0.5
 images:
   - src: ./jaeger-lecoultre-18ct-gold-rectangular-wristwatch-01.png
-    alt: Jaeger-LeCoultre rectangular wristwatch in 18ct yellow gold, seen from the front against a black ground. A gilt dial with the applied JL emblem and baton indices, a textured gold bezel and faceted lugs, on a green leather strap.
+    alt: Jaeger-LeCoultre rectangular wristwatch in 18ct yellow gold, seen from the front against a black ground. A gilt dial with the applied JL emblem and baton indices, a textured gold bezel and faceted lugs, on a green crocodile strap.
     caption: Dial
   - src: ./jaeger-lecoultre-18ct-gold-rectangular-wristwatch-02.png
     alt: The case back of the same watch, showing its hallmarks, the case number 1 293 574, the gold crown and the screwed lugs.
