@@ -69,6 +69,7 @@ const fields: Array<[string, string | undefined]> = [
   ['Material', d.material],
   ['Dimensions', d.dimensions],
   ['Weight', d.weight],
+  ...d.specifications.map(({ label, value }): [string, string] => [label, value]),
   ['Condition', d.conditionSummary],
   ['Availability', AVAILABILITY_LABEL[d.availability]],
 ];

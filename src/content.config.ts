@@ -56,6 +56,14 @@ const objectsCollection = defineCollection({
       material: z.string().optional(),
       dimensions: z.string().optional(),
       weight: z.string().optional(),
+      /**
+       * Further rows for the specifications list, in order, after Weight:
+       * measurements, movement, markings and anything else an object needs
+       * that the fixed fields above do not cover.
+       */
+      specifications: z
+        .array(z.object({ label: z.string(), value: z.string() }))
+        .default([]),
       description: z.string().optional(),
       historicalContext: z.string().optional(),
       provenance: z.array(z.string()).optional(),
