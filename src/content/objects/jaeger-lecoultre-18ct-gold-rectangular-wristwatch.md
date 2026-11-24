@@ -42,7 +42,8 @@ conditionSummary: Recently serviced
 omitSections: [historical-context, literature, comparative-examples]
 price: 2950
 currency: GBP
-availability: AVAILABLE
+availability: SOLD
+soldDate: 2026-11-24
 featured: true
 order: 0.5
 images:
